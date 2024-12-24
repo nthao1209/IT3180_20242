@@ -1,14 +1,167 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model book_categories {
+  category_id         Int                   @id @default(autoincrement())
+  category_name       String                @db.VarChar(255)
+  book_category_links book_category_links[]
+}
+
+model books {
+  book_id             Int                   @id @default(autoincrement())
+  isbn                String                @db.VarChar(13)
+  name                String                @db.VarChar(255)
+  author              String                @db.VarChar(80)
+  no_of_copies        Int                   @db.SmallInt
+  is_active           Boolean               @default(true)
+  publish_year        Int                   @db.SmallInt
+  created_at          DateTime              @default(now()) @db.Timestamp(0)
+  updated_at          DateTime              @default(now()) @db.Timestamp(0)
+  book_category_links book_category_links[]
+  book_photos         book_photos[]
+  borrowings          borrowings[]
+  ratings             ratings[]
+  reservations        reservations[]
+  staff_picks         staff_picks[]
+}
+
+model book_category_links {
+  book_id         Int
+  category_id     Int
+  books           books           @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "book_category_links_ibfk_1")
+  book_categories book_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "book_category_links_ibfk_2")
+
+  @@id([book_id, category_id])
+  @@index([category_id], map: "category_id")
+}
+
+model activities {
+  activity_id     Int               @id @default(autoincrement())
+  title           String            @db.VarChar(255)
+  description     String?           @db.Text
+  activity_date   DateTime          @db.Date
+  start_time      String            @db.VarChar(10)
+  end_time        String            @db.VarChar(10)
+  age_group       String?           @db.VarChar(20)
+  capacity        Int?
+  photo_url       String?           @db.VarChar(1024)
+  created_at      DateTime?         @default(now()) @db.Timestamp(0)
+  updated_at      DateTime?         @default(now()) @db.Timestamp(0)
+  activity_photos activity_photos[]
+}
+
+model activity_photos {
+  photo_id    Int        @id @default(autoincrement())
+  activity_id Int
+  url         String     @db.VarChar(1024)
+  created_at  DateTime?  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime?  @default(now()) @db.Timestamp(0)
+  activities  activities @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, onUpdate: NoAction, map: "activity_photos_ibfk_1")
+
+  @@index([activity_id], map: "activity_id")
+}
+
+model book_photos {
+  photo_id   Int       @id @default(autoincrement())
+  book_id    Int
+  url        String    @db.VarChar(1024)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @default(now()) @db.Timestamp(0)
+  books      books     @relation(fields: [book_id], references: [book_id], onDelete: Cascade, onUpdate: NoAction, map: "book_photos_ibfk_1")
+
+  @@index([book_id], map: "book_id")
+}
+
+model borrowings {
+  borrowing_id Int       @id @default(autoincrement())
+  book_id      Int
+  user_id      Int
+  borrow_date  DateTime  @db.Date
+  due_date     DateTime  @db.Date
+  return_date  DateTime? @db.Date
+  books        books     @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "borrowings_ibfk_1")
+  users        users     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "borrowings_ibfk_2")
+  fines        fines[]
+
+  @@index([book_id], map: "book_id")
+  @@index([user_id], map: "user_id")
+}
+
+model fines {
+  fine_id      Int        @id @default(autoincrement())
+  borrowing_id Int
+  user_id      Int
+  fine_amount  Decimal    @db.Decimal(10, 2)
+  fine_date    DateTime   @db.Date
+  paid_date    DateTime?  @db.Date
+  borrowings   borrowings @relation(fields: [borrowing_id], references: [borrowing_id], onDelete: NoAction, onUpdate: NoAction, map: "fines_ibfk_1")
+  users        users      @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fines_ibfk_2")
+
+  @@index([borrowing_id], map: "borrowing_id")
+  @@index([user_id], map: "user_id")
+}
+
+model ratings {
+  rating_id  Int      @id @default(autoincrement())
+  book_id    Int
+  user_id    Int
+  rating     Int      @db.TinyInt
+  review     String?  @db.Text
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  books      books    @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "ratings_ibfk_1")
+  users      users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "ratings_ibfk_2")
+
+  @@index([book_id], map: "book_id")
+  @@index([user_id], map: "user_id")
+}
+
+model reservations {
+  reservation_id   Int      @id @default(autoincrement())
+  book_id          Int
+  user_id          Int
+  reservation_date DateTime @db.Date
+  expiration_date  DateTime @db.Date
+  books            books    @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "reservations_ibfk_1")
+  users            users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "reservations_ibfk_2")
+
+  @@index([book_id], map: "book_id")
+  @@index([user_id], map: "user_id")
+}
+
+model staff_picks {
+  pick_id   Int      @id @default(autoincrement())
+  book_id   Int
+  user_id   Int
+  pick_date DateTime @db.Date
+  books     books    @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "staff_picks_ibfk_1")
+  users     users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "staff_picks_ibfk_2")
+
+  @@index([book_id], map: "book_id")
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  user_id         Int            @id @default(autoincrement())
+  email           String         @unique(map: "email") @db.VarChar(100)
+  name            String         @db.VarChar(80)
+  image           String         @db.VarChar(190)
+  password        String         @db.VarChar(100)
+  library_card_no String         @db.VarChar(10)
+  profile_status  String?        @db.VarChar(10)
+  role            String         @db.VarChar(10)
+  is_active       Boolean        @default(true)
+  created_at      DateTime       @default(now()) @db.Timestamp(0)
+  updated_at      DateTime       @default(now()) @db.Timestamp(0)
+  last_login_at   DateTime?      @db.Timestamp(0)
+  borrowings      borrowings[]
+  fines           fines[]
+  ratings         ratings[]
+  reservations    reservations[]
+  staff_picks     staff_picks[]
 }
