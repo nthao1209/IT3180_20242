@@ -34,8 +34,8 @@ model books {
 model book_category_links {
   book_id         Int
   category_id     Int
-  books           books           @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "book_category_links_ibfk_1")
-  book_categories book_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "book_category_links_ibfk_2")
+  books           books           @relation(fields: [book_id], references: [book_id], onDelete: Cascade, onUpdate: NoAction, map: "book_category_links_ibfk_1")
+  book_categories book_categories @relation(fields: [category_id], references: [category_id], onDelete: Cascade, onUpdate: NoAction, map: "book_category_links_ibfk_2")
 
   @@id([book_id, category_id])
   @@index([category_id], map: "category_id")

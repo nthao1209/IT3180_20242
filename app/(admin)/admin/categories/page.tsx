@@ -16,7 +16,6 @@ async function CategoriesPage({
         prisma.book_categories.count()
     ])
 
-    console.log(categories)
     return (
         <div className='flex flex-col space-y-4'>
             <AddCategoryButton />

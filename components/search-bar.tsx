@@ -2,15 +2,18 @@ import React from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
+import { redirect } from 'next/navigation'
 
 function SearchBar() {
 
     async function doSearch(formData: FormData) {
         'use server'
-        const search_by = formData.get('search_by')
-        const search = formData.get('search')
+        const search_by = formData.get('search_by') as string
+        const search = formData.get('search') as string
 
-        console.log(search_by, search)
+        if (search && search_by) {
+            redirect(`/search?query=${encodeURIComponent(search)}&search_by=${encodeURIComponent(search_by)}`)
+        }
     } 
   return (
     <form action={doSearch}>
