@@ -3,6 +3,9 @@
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import bcrypt from 'bcryptjs'
+import { auth, signIn, signOut } from "@/auth"
+import { addDays } from "date-fns"
+import { z } from "zod"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,6 +234,91 @@ export async function deleteBook(book_id: number, path: string) {
 
     revalidatePath(path)
 }
+
+export async function placeHold(book_id: number, path: string) {
+    const session = await auth()
+    
+    if (!session) {
+        throw new Error("You must be logged in")
+    }
+
+    await prisma.$transaction(t => (
+        t.reservations.create({
+            data: {
+                book_id: +book_id,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                user_id: +session?.user.id!,
+                reservation_date: new Date(),
+                expiration_date: addDays(new Date(), 15)
+            }
+        })
+    ))
+
+    revalidatePath(path)
+}
+
+export async function cancelHold(id: number, path: string) {
+    await prisma.$transaction(t => (
+        t.reservations.delete({
+            where: {
+                reservation_id: id
+            }
+        })
+    ))
+
+    revalidatePath(path)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//              Staff picks
+////////////////////////////////////////////////////////////////////////////////
+export async function addToStaffPicks(book_id: number, path: string) {
+    const session = await auth()
+    
+    if (!session) {
+        throw new Error("You must be logged in")
+    }
+
+    try {
+        await prisma.$transaction([
+            prisma.staff_picks.create({
+                data: {
+                    book_id: +book_id,
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                    user_id: +session?.user.id!,
+                    pick_date: new Date()
+                }
+            })
+        ])
+
+        revalidatePath(path)
+    } catch(error) {
+        throw error
+    }
+}
+
+export async function removeFromStaffPicks(pick_id: number, path: string) {
+    const session = await auth()
+    
+    if (!session) {
+        throw new Error("You must be logged in")
+    }
+
+    try {
+        await prisma.$transaction([
+            prisma.staff_picks.delete({
+                where: {
+                    pick_id: pick_id,
+                }
+            })
+        ])
+
+        revalidatePath(path)
+    } catch(error) {
+        throw error
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //              Users
 ////////////////////////////////////////////////////////////////////////////////
@@ -316,6 +404,71 @@ export async function deleteUser(id: number, path: string) {
         throw error
     }
 }
+
+const passwordFormSchema = z.object({
+    new_password: z.string().min(8)
+})
+
+export async function updateProfile(prevState: State, formData: FormData) {
+
+    const new_password = formData.get('new_password') as string
+    const old_password = formData.get('old_password') as string
+
+    const session = await auth()
+
+    if (!session) {
+        await signIn()
+    }
+
+    const user = await prisma.users.findUnique({
+        where: {
+            user_id: session?.user.user_id,
+            email: session?.user.email as string
+        }
+    })
+
+    if (!user) {
+        return { message: 'Invalid user'}
+    }
+
+    if (new_password) {
+        const passwordValidate = passwordFormSchema.safeParse({
+            new_password: new_password
+        })
+
+        if (!passwordValidate.success) {
+            return { message: 'Invalid password'}
+        }
+
+        const password_match = await bcrypt.compare(old_password, user.password)
+
+        if (!password_match) {
+            return { message: 'Invalid password'}
+        }
+
+        const new_hash_password = bcrypt.hashSync(new_password, 10)
+
+        await prisma.users.update({
+            where: {
+                user_id: session?.user.user_id,
+                email: session?.user.email as string
+            },
+            data: {
+                password: new_hash_password,
+                profile_status: ''
+            }
+        })
+
+        await signOut({
+            redirectTo: `/auth/signin?callbackUrl=${encodeURIComponent('/admin')}&message=${encodeURIComponent('password updated, Please log in.')}`
+        })
+    }
+
+    return {
+        message: 'profile updated'
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //              Activities
@@ -514,4 +667,37 @@ export async function deletePhoto(table: string, id: number, path: string) {
     } catch(error) {
         throw error
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//              Rating
+////////////////////////////////////////////////////////////////////////////////
+export async function addRating(book_id: number, prevState: State, formData: FormData) {
+
+    const session = await auth()
+
+    if (!session) {
+        return { message: "You must be logged in" }
+    }
+
+    await prisma.$transaction([
+        prisma.ratings.create({
+            data: {
+                book_id: book_id,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                user_id: +session?.user.id!,
+                rating: +formData.get('rating')!,
+                review: formData.get('comment')?.toString()
+            }
+        })
+    ])
+
+    return {
+        message: "Thank you for your review"
+    }
+}
+
+
+export type State = {
+    message?: string | null
 }

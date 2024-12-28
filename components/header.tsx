@@ -1,6 +1,7 @@
 import React from 'react'
 import Logo from './logo'
 import SearchBar from './search-bar'
+import { SidebarTrigger } from './ui/sidebar'
 
 function Header() {
   return (
@@ -12,6 +13,7 @@ function Header() {
             {/* logo */}
             <Logo />
             {/* sidebar trigger */}
+            <SidebarTrigger className='flex md:hidden ml-2'/>
           </div>
 
           <SearchBar />

@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import React from 'react'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger } from './ui/navigation-menu'
-import { User2Icon } from 'lucide-react'
 import { addWeeks, format } from 'date-fns'
+import UserButton from './user-button'
 
 function Navbar() {
 
@@ -58,7 +58,10 @@ function Navbar() {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-        <User2Icon size={16}/>
+        <div>
+          <UserButton />
+        </div>
+
       </div>
     </nav>
   )
