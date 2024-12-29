@@ -1,5 +1,25 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Intro
+A complete Library management app with admin dashboard. Featuers inclue:
+ - Staff onboarding
+ - Site wide search
+ - Catalog management
+ - Paying fines
+ - Firebase
+ - Prisma
+ - Stripe
+ - and more...
+
+## Auth and middleware
+For those please watch the video on my youtube channel
+
+## env keys
+You need firebase, database and stripe keys
+
+## Database
+The app uses Prisma client and MySql database
+
 ## Getting Started
 
 First, run the development server:
