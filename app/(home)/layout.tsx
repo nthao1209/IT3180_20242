@@ -7,12 +7,12 @@ function HomeLayout({ children }: {
     children: React.ReactNode
 }) {
   return (
-    <div>
+    <>
         <Header />
         <Navbar />
         {children}
         <Footer />
-    </div>
+    </>
   )
 }
 

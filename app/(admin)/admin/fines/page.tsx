@@ -11,7 +11,20 @@ async function FinesPage({
   const take = parseInt(params.limit || '10')
 
   const [fines, total] = await prisma.$transaction([
-    prisma.fines.findMany({ skip: offset, take: take }),
+    prisma.fines.findMany({ 
+      skip: offset, take: take,
+      select: {
+        fine_id: true,
+        fine_amount: true,
+        fine_date: true,
+        paid_date: true,
+        users: {
+          select: {
+            name: true
+          }
+        }
+      }
+     }),
     prisma.fines.count()
   ])
   return (

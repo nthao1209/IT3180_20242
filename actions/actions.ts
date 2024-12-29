@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import bcrypt from 'bcryptjs'
 import { auth, signIn, signOut } from "@/auth"
-import { addDays } from "date-fns"
+import { addDays, addMonths, differenceInCalendarDays } from "date-fns"
 import { z } from "zod"
+import { stripe } from "@/lib/stripe"
+import { formatAmountForStripe } from "@/lib/utils"
+import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -267,6 +271,118 @@ export async function cancelHold(id: number, path: string) {
     ))
 
     revalidatePath(path)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//              Kiosk sim
+////////////////////////////////////////////////////////////////////////////////
+export async function checkoutBook(prevState: State, formData: FormData) {
+
+    const library_card_no = formData.get('library_card_no') as string
+    const isbn = formData.get('isbn')?.toString().replaceAll('-', '')
+
+    const book = await prisma.books.findFirst({
+        where: {
+            isbn: isbn
+        },
+        select: {
+            book_id: true,
+            name: true
+        }
+    })
+
+    const user = await prisma.users.findFirst({
+        where: {
+            library_card_no: library_card_no
+        }
+    })
+
+    if (book && user ) {
+        const date = new Date()
+        await prisma.$transaction(async t => (
+
+            await t.borrowings.create({
+                data: {
+                    book_id: book.book_id,
+                    user_id: user.user_id,
+                    borrow_date: date,
+                    due_date: addDays(date, 15)
+                }
+            })
+        ))
+
+        return {
+            message: `You have checked out ${book.name}`
+        }
+    }
+
+    return {
+        message: `Checkout failed. See a librarian`
+    }
+}
+
+export async function checkinBook(prevState: State, formData: FormData) {
+    const isbn = formData.get('isbn')?.toString().replaceAll('-', '')
+    const book = await prisma.books.findFirst({
+        where: {
+            isbn: isbn
+        },
+        select: {
+            book_id: true,
+            name: true
+        }
+    })
+
+    const borrowing = await prisma.borrowings.findFirst({
+        where: {
+            book_id: book?.book_id
+        }
+    })
+
+    if (!borrowing) {
+        return {
+            message: 'Invalid transaction'
+        }
+    }
+    
+    const user_id = borrowing?.user_id
+    const return_date = addMonths(new Date(), 1)
+    const diffInDays = differenceInCalendarDays(return_date, borrowing?.due_date as Date)
+    let message = ''
+
+    await prisma.$transaction(async t => {
+
+        await t.borrowings.update({
+            where: {
+                borrowing_id: borrowing?.borrowing_id
+            },
+            data: {
+                return_date: return_date
+            }
+        })
+
+        if (diffInDays > 0) {
+            // $0.50 penalty
+            const fineAmount = diffInDays * 0.50
+            await t.fines.create({
+                data: {
+                    fine_date: return_date,
+                    fine_amount: fineAmount,
+                    user_id: user_id,
+                    borrowing_id: borrowing?.borrowing_id
+                }
+            })
+
+            message = `${book?.name} checked in. You have a fine of $${fineAmount}`
+        } else {
+            message =  `${book?.name} checked in `
+        }
+    })
+
+    return {
+        message: message
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -605,6 +721,51 @@ export async function deleteFine(id: number, path: string) {
     }
 }
 
+export async function createCheckoutSession(data: FormData) {
+
+    const session = await auth()
+    if (!session) throw new Error("you must be logged in")
+
+    const fine_id = +data.get('fine_id')!   
+    const fine = await prisma.fines.findUnique({
+        where: {
+            fine_id: fine_id
+        },
+        include: {
+            borrowings: {
+                include: {
+                    books: {
+                        select: { name: true }
+                    }
+                }
+            }
+        }
+    })
+
+    const checkoutSession = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        submit_type: 'pay',
+        metadata: {
+            fine_id: fine_id
+        },
+        line_items: [
+            {
+                quantity: 1,
+                price_data: {
+                    currency: 'cad',
+                    product_data: {
+                        name: `Late return fine for ${fine?.borrowings.books.name}`
+                    },
+                    unit_amount: formatAmountForStripe((fine?.fine_amount as unknown) as number, 'CAD')
+                }
+            }
+        ],
+        success_url: `${(await headers()).get('origin')}/fine/result?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${(await headers()).get('origin')}`
+    })
+
+    redirect(checkoutSession.url!)
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //              Photos

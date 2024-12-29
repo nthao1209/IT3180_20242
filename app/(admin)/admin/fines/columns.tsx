@@ -41,6 +41,6 @@ export const columns: ColumnDef<Fine>[] = [
             : <p className="text-red-500 font-bold">Not paid</p>
         )
     },
-    createRowActions<Fine>()
+    createRowActions<Fine>({edit_label: 'Mark as paid'})
    
 ]

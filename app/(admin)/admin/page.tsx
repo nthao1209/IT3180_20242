@@ -8,7 +8,7 @@ async function AdminPage({
 }: { searchParams: { page: string, limit: string } })  {
 
   const params = await searchParams
-  const offset = parseInt(params.page || '10')
+  const offset = parseInt(params.page || '1')
   const take = parseInt(params.limit || '10')
 
   const [books, total] = await prisma.$transaction([
