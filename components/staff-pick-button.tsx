@@ -15,7 +15,7 @@ async function StaffPickButton({ book_id }: { book_id: number }) {
     const has_staff_pick = await prisma.staff_picks.findFirst({
         where: {
             book_id: +book_id,
-            user_id: +session.user.id!
+            user_id: session.user.user_id
         }
     })
   return (

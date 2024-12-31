@@ -250,8 +250,7 @@ export async function placeHold(book_id: number, path: string) {
         t.reservations.create({
             data: {
                 book_id: +book_id,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                user_id: +session?.user.id!,
+                user_id: session?.user.user_id,
                 reservation_date: new Date(),
                 expiration_date: addDays(new Date(), 15)
             }
@@ -400,8 +399,7 @@ export async function addToStaffPicks(book_id: number, path: string) {
             prisma.staff_picks.create({
                 data: {
                     book_id: +book_id,
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                    user_id: +session?.user.id!,
+                    user_id: session?.user.user_id,
                     pick_date: new Date()
                 }
             })
@@ -845,8 +843,7 @@ export async function addRating(book_id: number, prevState: State, formData: For
         prisma.ratings.create({
             data: {
                 book_id: book_id,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                user_id: +session?.user.id!,
+                user_id: session?.user.user_id,
                 rating: +formData.get('rating')!,
                 review: formData.get('comment')?.toString()
             }

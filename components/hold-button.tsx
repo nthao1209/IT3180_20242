@@ -12,7 +12,7 @@ async function HoldButton({ book_id }: { book_id: number }) {
 
     const reservation = await prisma.reservations.findFirst({
         where: {
-            user_id: +session.user.id!,
+            user_id: session.user.user_id,
             book_id: +book_id
         }
     })
