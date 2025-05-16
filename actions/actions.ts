@@ -2,38 +2,48 @@
 
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { auth, signIn, signOut } from "@/auth"
+
+////////////////////////////////////////////////////////////////////////////////
+//              Rating
+////////////////////////////////////////////////////////////////////////////////
+export async function addRating(book_id: number, prevState: State, formData: FormData) {
+
+    const session = await auth()
+
+    if (!session) {
+        return { message: "You must be logged in" }
+    }
+
+    await prisma.$transaction([
+        prisma.ratings.create({
+            data: {
+                book_id: book_id,
+                user_id: session?.user.user_id,
+                rating: +formData.get('rating')!,
+                
+            }
+        })
+    ])
+
+    return {
+        message: "Thank you for your review"
+    }
+}
+
+
+export type State = {
+    message?: string | null
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //              Comment API
 ////////////////////////////////////////////////////////////////////////////////
 
-/**
- * API để thêm bình luận hoặc trả lời bình luận cho sách.
- * - Nếu có `comment_id` trong payload thì tạo một **reply** cho comment đó.
- * - Nếu không có `comment_id` thì tạo một **comment mới** cho sách theo `book_id`.
- * 
- * Yêu cầu người dùng phải đăng nhập.
- * 
- * Dữ liệu gửi lên dạng JSON, ví dụ:
- * - Tạo comment mới:
- *    {
- *      "book_id": 123,
- *      "content": "Bình luận về cuốn sách này"
- *    }
- * 
- * - Trả lời comment đã có:
- *    {
- *      "comment_id": 456,
- *      "content": "Trả lời bình luận này"
- *    }
- */
+
 export async function POST(request: Request) {
-  // Tạm giả lập session user_id = 1 để test (bạn tạo user này trong DB trước)
-  const session = {
-    user: {
-      user_id: 1,
-    }
-  }
+  
+  const session = await auth()
 
   // Nếu chưa đăng nhập, trả về lỗi 401 Unauthorized
   if (!session) {
