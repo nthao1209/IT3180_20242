@@ -29,7 +29,8 @@ model books {
   book_id           Int       @id @default(autoincrement())
   isbn                String                @db.VarChar(13)
   name         String    @db.VarChar(200)
-  author        String?   @db.VarChar(100)
+  author_id     Int
+  users      users    @relation(fields: [author_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "author_book")
 
   description   String?   @db.Text
   published_date Int 
