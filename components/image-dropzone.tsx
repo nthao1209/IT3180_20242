@@ -64,26 +64,23 @@ function ImageDropzone({
 
             setImageStates(prevStates => [...prevStates, ...addedFiles])
 
-            addedFiles.map(async file => {
-                promises.push(
+            for (const file of addedFiles) {
+                const uploadPromise = (async (): Promise<UploadInterface> => {
+                    const fileRef = storageRef(file.filename)
+                    await uploadBytes(fileRef, file.file as File)
+                    const downloadUrl = await getDownloadURL(fileRef)
 
-                    new Promise(async resolve => {
-                        const fileRef = storageRef(file.filename)
-                        
-                        // wait for upload
-                        await uploadBytes(fileRef, file.file as File)
+                    return {
+                    file: file.file,
+                    filename: file.filename,
+                    state: 'complete',
+                    downloadUrl: downloadUrl
+                }
+    })()
 
-                        const downloadUrl = await getDownloadURL(fileRef)
+    promises.push(uploadPromise)
+}
 
-                        resolve({
-                            file: file.file,
-                            filename: file.filename,
-                            state: file.state,
-                            downloadUrl: downloadUrl
-                        })
-                    })
-                )
-            })
 
             //wait for promises to finish
             const result = await Promise.all(promises)
@@ -115,7 +112,7 @@ function ImageDropzone({
         } finally {
             setUploading(false)
         }
-    }, [])
+    },  [onFilesAdded])
 
     const { getRootProps, getInputProps } = useDropzone({
         accept: { 'image/*': [] },
@@ -123,12 +120,12 @@ function ImageDropzone({
     })
 
     const _handleDelete = async (photourl: string) => {
+        const image = imageStates.find(img => img.downloadUrl === photourl)
+        if (!image) return
 
-        // delete from firebase
-        const ref = storageRef(photourl)
-        await deleteObject(ref)
-        
-        // update local state
+        const fileRef = storageRef(image.filename)
+        await deleteObject(fileRef)
+
         const newState = imageStates.filter(state => state.downloadUrl !== photourl)
         setImageStates(newState)
 
@@ -167,7 +164,7 @@ function ImageDropzone({
                             {
                                 uploading && image.state === 'pending' &&
                                 <div className='absolute top-0 left-0 flex h-full w-full items-center justify-center rounded-md
-                        bg-black bg-opacity-65'>
+                                bg-black bg-opacity-65'>
                                     <Loader />
                                 </div>
                             }

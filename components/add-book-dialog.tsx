@@ -146,7 +146,7 @@ function AddBookDialog({ open, setOpen, book }: props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent hover:scrollbar-thumb-transparent">
                 <DialogHeader>
                     <DialogTitle>Add book</DialogTitle>
                     <DialogDescription></DialogDescription>

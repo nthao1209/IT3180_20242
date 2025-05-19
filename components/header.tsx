@@ -5,7 +5,7 @@ import { SidebarTrigger } from './ui/sidebar'
 
 function Header() {
   return (
-    <>
+    <div>
       <header className='py-2 lg:py-4 container mx-auto '>
         {/* mobile */}
         <div className="flex sm:hidden flex-col justify-between p-2">
@@ -28,7 +28,7 @@ function Header() {
           <SearchBar />
         </div>
       </header>
-    </>
+    </div>
   )
 }
 
