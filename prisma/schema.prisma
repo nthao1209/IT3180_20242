@@ -30,7 +30,7 @@ model books {
   isbn                String                @db.VarChar(13)
   name         String    @db.VarChar(200)
   author_id     Int
-  users      users    @relation(fields: [author_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "author_book")
+  users      users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "author_book")
 
   description   String?   @db.Text
   published_date Int 

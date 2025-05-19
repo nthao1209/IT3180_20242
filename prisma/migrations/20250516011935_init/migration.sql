@@ -203,3 +203,5 @@ ALTER TABLE "liked_books" ADD CONSTRAINT "liked_books_user_id_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "liked_books" ADD CONSTRAINT "liked_books_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "books" ADD CONSTRAINT "author_book" FOREIGN KEY ("author_id") REFERENCES "users"("user_id") ON DELETE NO ACTION ON UPDATE CASCADE;
