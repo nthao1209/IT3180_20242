@@ -16,7 +16,7 @@ CREATE TABLE "books" (
     "book_id" SERIAL NOT NULL,
     "isbn" VARCHAR(13) NOT NULL,
     "name" VARCHAR(200) NOT NULL,
-    "author" VARCHAR(100),
+    "author_id" INTEGER NOT NULL,
     "description" TEXT,
     "published_date" INTEGER NOT NULL,
     "cover_image" VARCHAR(255),

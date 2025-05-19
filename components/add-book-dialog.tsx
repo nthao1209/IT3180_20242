@@ -15,6 +15,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { addBook, addPhoto, deletePhoto, getCategories, updateBook } from '@/actions/actions'
 import { toast } from 'sonner'
 import ImageDropzone from './image-dropzone'
+import FileDropzone  from './file-dropzone'
 
 type props = {
     open: boolean,
@@ -221,7 +222,7 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                     </FormItem>
                                 )}
                             />
-                             <FormField
+                             {/* <FormField
                                 control={form.control}
                                 name='file_path'
                                 render={({ field }) => (
@@ -233,19 +234,19 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                         
                                     </FormItem>
                                 )}
-                            />
-                            {/* <FormField
+                            /> */}
+                             <FormField
                                 control={form.control}
-                                name={name}
-                
+                                name={name}              
                                 render={({ field }) => (
                                     <FileDropzone
+                                    
                                         onFileAdded={handleFileAdd}
                                         onFileDelete={handleFileDelete}
                                         initialFile={field.value}
                                     />
                                 )}
-                            /> */}
+                            /> 
                             <FormField
                                 control={form.control}
                                 name='price'

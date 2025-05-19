@@ -52,6 +52,12 @@ export async function addBook({
                     file_path: file_path
                 }
             })
+
+            // const user_book = await t.user_books.create({
+            //     data:{
+
+            //     }
+            // })
            
 
             if (category && category.length > 0) {

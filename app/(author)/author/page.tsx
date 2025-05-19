@@ -2,6 +2,7 @@ import AddBookButton from '@/components/add-book-button'
 import React from 'react'
 import CatalogTable from './(cataloge)/catalog-table'
 import { prisma } from '@/lib/prisma'
+import { auth, signIn, signOut } from "@/auth";
 
 async function AuthorPage({
   searchParams
@@ -10,10 +11,12 @@ async function AuthorPage({
   const params = await searchParams
   const offset = parseInt(params.page || '1')
   const take = parseInt(params.limit || '10')
+  const session = await auth();
 
   const [books, total] = await prisma.$transaction([
     prisma.books.findMany({
       skip: offset, take: take,
+      // where: {author_id: session.user.user_id },
       select: {
         book_id: true,
         name: true,
@@ -33,6 +36,7 @@ async function AuthorPage({
             url : true
           }
         }
+       
       }
     }),
     prisma.books.count()
