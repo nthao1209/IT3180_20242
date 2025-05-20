@@ -123,6 +123,19 @@ CREATE TABLE "liked_books" (
     CONSTRAINT "liked_books_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "book_requests" (
+    "request_id" SERIAL NOT NULL,
+    "book_id" INTEGER,
+    "author_id" INTEGER NOT NULL,
+    "action" VARCHAR(20) NOT NULL,
+    "details" TEXT,
+    "status" VARCHAR(20) NOT NULL DEFAULT 'pending',
+    "created_at" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "book_requests_pkey" PRIMARY KEY ("request_id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
@@ -158,6 +171,9 @@ CREATE UNIQUE INDEX "user_books_user_id_book_id_key" ON "user_books"("user_id", 
 
 -- CreateIndex
 CREATE UNIQUE INDEX "liked_books_user_id_book_id_key" ON "liked_books"("user_id", "book_id");
+
+-- AddForeignKey
+ALTER TABLE "books" ADD CONSTRAINT "author_book" FOREIGN KEY ("author_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "book_photos" ADD CONSTRAINT "book_photos_ibfk_1" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -204,4 +220,8 @@ ALTER TABLE "liked_books" ADD CONSTRAINT "liked_books_user_id_fkey" FOREIGN KEY 
 -- AddForeignKey
 ALTER TABLE "liked_books" ADD CONSTRAINT "liked_books_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE "books" ADD CONSTRAINT "author_book" FOREIGN KEY ("author_id") REFERENCES "users"("user_id") ON DELETE NO ACTION ON UPDATE CASCADE;
+-- AddForeignKey
+ALTER TABLE "book_requests" ADD CONSTRAINT "book_requests_author_id_fkey" FOREIGN KEY ("author_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "book_requests" ADD CONSTRAINT "book_requests_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE SET NULL ON UPDATE CASCADE;

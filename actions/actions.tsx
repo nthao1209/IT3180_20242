@@ -1,4 +1,3 @@
-
 ////////////////////////////////////////////////////////////////////////////////
 //              Books
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,11 +36,21 @@ export async function addBook({
     published_date: number,
     file_path: string
 }) {
+    // Validate required fields
+    if (!name || !isbn || !author) {
+        throw new Error('Name, ISBN and author are required fields')
+    }
+
+    if (isbn.length < 10 || isbn.length > 13) {
+        throw new Error('ISBN must be between 10 and 13 characters')
+    }
+
+    if (!category || category.length === 0) {
+        throw new Error('At least one category is required')
+    }
 
     try {
-
         await prisma.$transaction(async t => {
-           
             const book = await t.books.create({
                 data: {
                     name: name,
@@ -52,13 +61,6 @@ export async function addBook({
                     file_path: file_path
                 }
             })
-
-            // const user_book = await t.user_books.create({
-            //     data:{
-
-            //     }
-            // })
-           
 
             if (category && category.length > 0) {
                 const data = category.map(cat => ({
@@ -78,8 +80,8 @@ export async function addBook({
             }
             revalidatePath(path)
         })
-        
     } catch(error) {
+        console.error('Error adding book:', error)
         throw error
     }
 }

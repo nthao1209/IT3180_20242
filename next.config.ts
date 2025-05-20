@@ -23,8 +23,10 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com'
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '9199', // cần chỉ rõ port nếu dùng
+        pathname: '/v0/**',
       }
     ]
   }

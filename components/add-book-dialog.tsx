@@ -15,7 +15,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { addBook, addPhoto, deletePhoto, getCategories, updateBook } from '@/actions/actions'
 import { toast } from 'sonner'
 import ImageDropzone from './image-dropzone'
-import FileDropzone  from './file-dropzone'
+import FileDropzone from './file-dropzone'
+import { storageRef } from '@/lib/firebase'
 
 type props = {
     open: boolean,
@@ -28,18 +29,19 @@ const formSchema = z.object({
     name: z.string().min(1),
     isbn: z.string().min(10).max(13),
     author: z.string(),
-    price: z.preprocess((val) => Number(val), z.number()),
-    file_path: z.string(),
+    price: z.number().default(1),
+    file_path: z.string().default(''),
     published_date: z.coerce
         .number({ invalid_type_error: "must be a number" })
         .positive({ message: 'Value must be positive' })
         .finite({ message: "Must be a valid number" }),
-   
     category: z.array(z.number()).min(1, {
         message: 'A book must have a category'
     }),
-    photos: z.array(z.string())
+    photos: z.array(z.string()).default([])
 })
+
+type FormValues = z.infer<typeof formSchema>
 
 function AddBookDialog({ open, setOpen, book }: props) {
     const [categories, setCategories] =
@@ -47,9 +49,10 @@ function AddBookDialog({ open, setOpen, book }: props) {
     const [processing, setProcessing] = useState(false)
     const path = usePathname()
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            id: -1,
             name: "",
             isbn: '',
             author: '',
@@ -99,25 +102,28 @@ function AddBookDialog({ open, setOpen, book }: props) {
     }
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        try {
+            setProcessing(true)
+            let message = 'Book added'
 
-        setProcessing(true)
+            if (book) {
+                await updateBook({...values, path})
+                message = 'book updated'
+                setOpen(false)
+            } else {
+                await addBook({ ...values, path })
+            }
 
-        let message = 'Book added'
-
-        if (book) {
-            await updateBook({...values, path})
-            message = 'book updated'
-            setOpen(false)
-        } else {
-            await addBook({ ...values, path })
-
+            toast.success(message)
+            form.reset()
+        } catch (error) {
+            console.error('Error submitting form:', error)
+            toast.error('Failed to save book. Please check all required fields.')
+        } finally {
+            setProcessing(false)
         }
-
-        toast(    message )
-        form.reset()
-        setProcessing(false)
     }
-    const handleFileAdd = async (filesToUpload: string[]) => {
+    const handlePhotoAdd = async (filesToUpload: string[]) => {
 
         if (book) {
             const newPhoto = await addPhoto('book', book.book_id, filesToUpload[0], path)
@@ -129,22 +135,8 @@ function AddBookDialog({ open, setOpen, book }: props) {
         const existingPhotos = form.getValues('photos')
         form.setValue('photos', [...existingPhotos, ...filesToUpload])
     }
-    // const handleFileAdd = async (filesToUpload: string[]) => {
-    //     if (book) {
-    //       const newPhoto = await addPhoto('book', book.book_id, filesToUpload[0], path);
-    //       if (newPhoto) {
-    //         // Cập nhật state book để phản ánh ảnh mới
-    //         setBook((prevBook) =>
-    //           prevBook
-    //             ? { ...prevBook, book_photos: [...(prevBook.book_photos || []), newPhoto] }
-    //             : prevBook
-    //         );
-    //       }
-    //     }
-    //     const existingPhotos = form.getValues('photos');
-    //     form.setValue('photos', [...existingPhotos, ...filesToUpload]);
-    //   };
-    const handleFileDelete = async (url: string) => {
+
+    const handlePhotoDelete = async (url: string) => {
 
         if (book) {
             const photoToDelete = book.book_photos?.filter(bp => bp.url === url)
@@ -156,26 +148,25 @@ function AddBookDialog({ open, setOpen, book }: props) {
         form.setValue('photos', updatedPhotos)
     }
 
-    // const handleFileDelete = async (urlToDelete: string) => {
-    //     if (book && book.book_photos) {
-    //       const photoToDelete = book.book_photos.find(bp => bp.url === urlToDelete);
-    //       if (photoToDelete) {
-    //         const success = await deletePhoto('book', photoToDelete.photo_id, path);
-    //         if (success) {
-    //           // Cập nhật state book bằng cách lọc bỏ ảnh đã xóa
-    //           setBook((prevBook) =>
-    //             prevBook
-    //               ? { ...prevBook, book_photos: prevBook.book_photos.filter(bp => bp.url !== urlToDelete) }
-    //               : prevBook
-    //           );
-    //         } else {
-    //           toast.error('Failed to delete photo');
-    //         }
-    //       }
-    //     }
-    //     const updatedPhotos = form.getValues('photos').filter(p => p !== urlToDelete) ?? [];
-    //     form.setValue('photos', updatedPhotos);
-    //   };
+    const handleFileAdd = async (downloadUrl: string) => {
+        form.setValue('file_path', downloadUrl);
+        console.log('Data file uploaded:', downloadUrl);
+    };
+
+    const handleFileDelete = async (urlToDelete: string) => {
+        if (urlToDelete) {
+            try {
+                const ref = storageRef(urlToDelete);
+                form.setValue('file_path', "");
+            } catch (error) {
+                console.error('Error deleting data file:', error);
+            }
+        } else {
+            form.setValue('file_path', "");
+        }
+    };
+
+
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -194,6 +185,20 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                         <FormControl>
                                             <Input placeholder='book name' {...field} />
                                         </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name='isbn'
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>ISBN</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder='ISBN' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -209,44 +214,35 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
+                             <FormField
                                 control={form.control}
-                                name='isbn'
+                                name="file_path"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>ISBN</FormLabel>
+                                        <FormLabel>Data File </FormLabel>
                                         <FormControl>
-                                            <Input placeholder="XXX-X-XX-XXXXXX-X" {...field} />
+                                            <FileDropzone
+                                                initialFile={field.value}
+                                                onFileAdded={handleFileAdd}
+                                                onFileDelete={handleFileDelete}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
-                            />
-                             {/* <FormField
+                            /> 
+                         {/* <FormField
                                 control={form.control}
-                                name='file_path'
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>File path</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder='path' {...field} />
-                                        </FormControl>
-                                        
-                                    </FormItem>
-                                )}
-                            /> */}
-                             <FormField
-                                control={form.control}
-                                name={name}              
+                                name={name}
+                
                                 render={({ field }) => (
                                     <FileDropzone
-                                    
                                         onFileAdded={handleFileAdd}
                                         onFileDelete={handleFileDelete}
                                         initialFile={field.value}
                                     />
                                 )}
-                            /> 
+                            />  */}
                             <FormField
                                 control={form.control}
                                 name='price'
@@ -254,7 +250,12 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                     <FormItem>
                                         <FormLabel>Price</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="1$" {...field} />
+                                            <Input 
+                                                placeholder="1$" 
+                                                type="number"
+                                                {...field}
+                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -343,8 +344,8 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                 render={({ field }) => (
                                     <ImageDropzone
                                         photos={field.value}
-                                        onFilesAdded={handleFileAdd}
-                                         onFileDelete={handleFileDelete}
+                                        onFilesAdded={handlePhotoAdd}
+                                         onFileDelete={handlePhotoDelete}
                                     //    onFileDelete={(url) => handleFileDelete(url, '')}
                                     />
                                 )}

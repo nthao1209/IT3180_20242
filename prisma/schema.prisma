@@ -19,10 +19,12 @@ model users {
   ratings    ratings[]
 
   comments   comments[]
-   replies      replies[]
+  replies      replies[]
   payments   payments[]
   user_books user_books[]
+  author_books books[]
   liked_books liked_books[]
+  book_requests book_requests[]
 }
 
 model books {
@@ -46,6 +48,7 @@ model books {
   payments      payments[]
   user_books    user_books[]
   liked_books liked_books[]
+  book_requests       book_requests[]
 }
 
 model book_photos {
@@ -151,4 +154,17 @@ model liked_books{
   book          books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade)
 
   @@unique([user_id, book_id])
+}
+model book_requests {
+  request_id Int      @id @default(autoincrement())
+  book_id    Int?
+  author_id  Int
+  action     String   @db.VarChar(20)
+  details    String?  @db.Text
+  status     String   @default("pending") @db.VarChar(20)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  users      users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade, map: "book_requests_author_id_fkey")
+  books      books?   @relation(fields: [book_id], references: [book_id],  map: "book_requests_book_id_fkey")
+
+
 }
