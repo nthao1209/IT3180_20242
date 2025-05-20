@@ -19,7 +19,7 @@ async function AdminPage({
         name: true,
         isbn: true,
         published_date: true, 
-        author: true,
+        author_id: true,
         book_photos: {
           select: {
             photo_id: true,

@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { use } from "react"
 import bcrypt from 'bcryptjs'
-// import { auth, signIn, signOut } from "@/auth"
+import { auth, signIn, signOut } from "@/auth"
 // import { addDays, addMonths, differenceInCalendarDays } from "date-fns"
 import { z } from "zod"
 // import { formatAmountForStripe } from "@/lib/utils"
@@ -20,7 +20,6 @@ export async function addBook({
     isbn,
     category,
     path,
-    author,
     photos,
     price,
     published_date,
@@ -30,14 +29,13 @@ export async function addBook({
     isbn: string
     category: number[]
     path: string,
-    author: string,
     photos: string[],
     price: number,
     published_date: number,
     file_path: string
 }) {
     // Validate required fields
-    if (!name || !isbn || !author) {
+    if (!name || !isbn ) {
         throw new Error('Name, ISBN and author are required fields')
     }
 
@@ -48,14 +46,15 @@ export async function addBook({
     if (!category || category.length === 0) {
         throw new Error('At least one category is required')
     }
-
+ 
     try {
         await prisma.$transaction(async t => {
             const book = await t.books.create({
                 data: {
                     name: name,
                     isbn: isbn,
-                    author: author,
+                    // author_id: (await auth())!.user.user_id,
+                    author_id: 1,
                     price: price,
                     published_date: published_date,
                     file_path: file_path
@@ -92,7 +91,6 @@ export async function updateBook({
     isbn,
     category,
     path,
-    author,
     published_date,
     price,
     file_path
@@ -103,7 +101,6 @@ export async function updateBook({
     category: number[]
     path: string,
     photos: string[],
-    author: string,
     published_date: number,
     price: number,
     file_path: string
@@ -120,7 +117,6 @@ export async function updateBook({
                 data: {
                     name: name,
                     isbn: isbn,
-                    author: author,
                     file_path: file_path,
                     price: price,
                     published_date: published_date

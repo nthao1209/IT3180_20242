@@ -28,7 +28,6 @@ const formSchema = z.object({
     id: z.number().default(-1),
     name: z.string().min(1),
     isbn: z.string().min(10).max(13),
-    author: z.string(),
     price: z.number().default(1),
     file_path: z.string().default(''),
     published_date: z.coerce
@@ -55,7 +54,6 @@ function AddBookDialog({ open, setOpen, book }: props) {
             id: -1,
             name: "",
             isbn: '',
-            author: '',
             price: 1,
             category: [],
             photos: [],
@@ -81,7 +79,6 @@ function AddBookDialog({ open, setOpen, book }: props) {
             form.setValue('isbn', book.isbn)
             form.setValue('published_date', book.published_date)
             form.setValue('category', book.book_category_links?.map(c => c.category_id) as number[])
-            form.setValue('author', book.author)
             form.setValue('file_path', book.file_path)
             form.setValue('photos', book.book_photos?.map(p => p.url) || [])
             form.setValue('price', book.price)
@@ -202,18 +199,7 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name='author'
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Author</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder='last first' {...field} />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
+                           
                              <FormField
                                 control={form.control}
                                 name="file_path"

@@ -56,7 +56,7 @@ export default async function HomePage() {
                     <Link href={`/book/${arrival.book_id}`}>
                       <Image
                         className="h-[200px] w-[150px] sm:w-[200px] sm:h-[290px]"
-                       // src={arrival.book_photos[0].url}
+                        src={arrival.book_photos[0].url}
                         width={190}
                         height={0}
                         alt={arrival.name} />
