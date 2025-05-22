@@ -53,8 +53,8 @@ async function BookDetailsPage({ params }: {
         ])
 
     const copies_available = () => {
-        if (book_details?.no_of_copies) {
-            const count = book_details?.no_of_copies - reservation_count
+        if (book_details?. ) {
+            const count = book_details?.  - reservation_count
             return count < 0 ? 0 : count
         }
 
@@ -85,7 +85,7 @@ async function BookDetailsPage({ params }: {
 
                     <div className="flex items-center gap-2 mb-4">
                         <div className='flex p-2 text-green-700 border border-green-500 rounded-md space-x-1 '>
-                            <BookOpen /><span>Book,</span><span>{book_details?.publish_year}</span>
+                            <BookOpen /><span>Book,</span><span>{book_details?.published_date}</span>
                         </div>
 
                         {
@@ -108,12 +108,12 @@ async function BookDetailsPage({ params }: {
                     <div className=" text-gray-600 flex flex-row space-x-4 sm:space-x-0 sm:flex-col sm:space-y-1 bg-green-50 p-2 border-l-4 border-green-500 ">
 
                         <p className="text-green-700 font-medium pb-2">Availability</p>
-                        <p className='text-sm'><span className='font-bold'>{book_details?.no_of_copies}</span> copies</p>
+                        <p className='text-sm'><span className='font-bold'>{book_details?. }</span> copies</p>
                         <p className='text-sm'><span className='font-bold'>{copies_available()}</span>  available</p>
                         <p className='text-sm'><span className='font-bold'>{reservation_count}</span>  on hold</p>
                     </div>
                     {
-                       <HoldButton book_id={p.book_id} />
+                        <HoldButton book_id={p.book_id} />
                     }
                     {
                         <StaffPickButton book_id={p.book_id} />

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'
-import { BookCheck, Home, IdCard, Library, MapIcon, PartyPopper, Settings, Stamp } from 'lucide-react'
+import { BookCheck, Home, IdCard, Library, MapIcon, Settings, Stamp } from 'lucide-react'
 import Link from 'next/link'
 import UserButton from './user-button'
 
@@ -21,11 +21,11 @@ const menu_items = [
         url: "/locations",
         icon: MapIcon,
     },
-    {
-        title: "Activities",
-        url: "/activities",
-        icon: PartyPopper,
-    },
+    // {
+    //     title: "Activities",
+    //     url: "/activities",
+    //     icon: PartyPopper,
+    // },
     {
         title: "Library resources",
         url: "#",

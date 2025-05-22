@@ -55,9 +55,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                             throw new Error('Invalid credentials')
                         } 
                     } else if (user.role === 'member') {
-                        if(user.library_card_no !== credentials.password) {
-                            throw new Error('Invalid credentials')
-                        }
+                        // if(user.library_card_no !== credentials.password) {
+                            // throw new Error('Invalid credentials')
+                        // }
                     }
                     
                 }
@@ -114,7 +114,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     pages: {
         signIn: '/auth/signin'
     },
-    basePath: '/api/trpc',// watch the video,
+    basePath: '/auth',// watch the video,
     logger: {
         error(code, ...message) {
             console.error(code, message)

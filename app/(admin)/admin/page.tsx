@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 async function AdminPage({
   searchParams
-}: { searchParams: { page: string, limit: string } })  {
+}: { searchParams: { page: string, limit: string } }) {
 
   const params = await searchParams
   const offset = parseInt(params.page || '1')
@@ -17,15 +17,15 @@ async function AdminPage({
       select: {
         book_id: true,
         name: true,
-        no_of_copies: true,
+        //  : true,
         isbn: true,
-        is_active: true,
-        publish_year: true, 
+        // is_active: true,
+        published_date: true,
         author: true,
         book_photos: {
           select: {
             photo_id: true,
-            url : true
+            url: true
           }
         },
         book_category_links: {
@@ -41,7 +41,7 @@ async function AdminPage({
   return (
     <div>
       <AddBookButton />
-      <CatalogTable data={{data: books, total: total}} />
+      <CatalogTable data={{ data: books, total: total }} />
     </div>
   )
 }
