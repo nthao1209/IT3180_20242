@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json", 
+  "ts-node": { 
+    "compilerOptions": {
+      "module": "esnext", 
+      "target": "es2022"   
+    }
+  },
+  "include": [ 
+    "prisma/seed.ts"
+  ]
+}

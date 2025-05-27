@@ -1,0 +1,172 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["typedSql"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model book_categories {
+  category_id         Int                   @id @default(autoincrement())
+  category_name       String                @db.VarChar(255)
+  book_category_links book_category_links[]
+}
+
+model books {
+  book_id             Int                   @id @default(autoincrement())
+  isbn                String                @db.VarChar(13)
+  name                String                @db.VarChar(200)
+  author              String?               @db.VarChar(100)
+  description         String?               @db.Text
+  published_date      Int   
+  cover_image         String?               @db.VarChar(255)
+  file_path           String?               @db.VarChar(500)
+  price               Decimal               @default(0.00) @db.Decimal(10, 2)
+  created_at          DateTime              @default(now()) @db.Timestamp(3)
+  state               Boolean               @default(false)
+  book_category_links book_category_links[]
+  book_photos         book_photos[]
+  comments            comments[]
+  liked_books         liked_books[]
+  totalPages          Int?
+  payments            payments[]
+  ratings             ratings[]
+  user_books          user_books[]
+  reading_sessions    reading_sessions[]
+}
+
+model reading_sessions {
+  session_id          String   @id @default(cuid()) 
+  user_id             Int
+  book_id             Int
+  last_location       String?
+  last_read_timestamp DateTime @updatedAt 
+
+  users               users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  books               books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade)
+
+  @@unique([user_id, book_id]) 
+  @@index([user_id])
+  @@index([book_id])
+}
+
+model book_category_links {
+  book_id         Int
+  category_id     Int
+  books           books           @relation(fields: [book_id], references: [book_id], onDelete: Cascade, onUpdate: NoAction, map: "book_category_links_ibfk_1")
+  book_categories book_categories @relation(fields: [category_id], references: [category_id], onDelete: Cascade, onUpdate: NoAction, map: "book_category_links_ibfk_2")
+
+  @@id([book_id, category_id])
+  @@index([category_id], map: "category_id_link_idx")
+}
+
+model book_photos {
+  photo_id   Int       @id @default(autoincrement())
+  book_id    Int
+  url        String    @db.VarChar(1024)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @default(now()) @db.Timestamp(0)
+  books      books     @relation(fields: [book_id], references: [book_id], onDelete: Cascade, onUpdate: NoAction, map: "book_photos_ibfk_1")
+
+  @@index([book_id], map: "book_id_photo_idx")
+}
+
+model ratings {
+  rating_id  Int      @id @default(autoincrement())
+  book_id    Int
+  user_id    Int
+  rating     Int
+  review     String?  @db.Text
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  books      books    @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "ratings_ibfk_1")
+  users      users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "ratings_ibfk_2")
+
+  @@index([book_id], map: "book_id_rating_idx")
+  @@index([user_id], map: "user_id_rating_idx")
+}
+
+model users {
+  user_id     Int           @id @default(autoincrement())
+  username    String        @unique @db.VarChar(50)
+  email       String        @unique @db.VarChar(100)
+  password    String        @db.Text
+  name        String?       @db.VarChar(100)
+  role        String        @db.VarChar(30)
+  created_at  DateTime      @default(now()) @db.Timestamp(0)
+  comments    comments[]
+  liked_books liked_books[]
+  payments    payments[]
+  ratings     ratings[]
+  replies     replies[]
+  user_books  user_books[]
+  reading_sessions reading_sessions[]
+}
+
+model comments {
+  comment_id Int       @id @default(autoincrement())
+  book_id    Int
+  user_id    Int
+  content    String    @db.Text
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @default(now()) @db.Timestamp(0)
+  books      books     @relation(fields: [book_id], references: [book_id], onDelete: Cascade, map: "fk_comments_book")
+  users      users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_comments_user")
+  replies    replies[]
+
+  @@index([book_id], map: "book_id_comment_idx")
+  @@index([user_id], map: "user_id_comment_idx")
+}
+
+model liked_books {
+  id       Int      @id @default(autoincrement())
+  user_id  Int
+  book_id  Int
+  liked_at DateTime @default(now()) @db.Timestamp(3)
+  books    books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade, map: "fk_liked_books_book")
+  users    users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_liked_books_user")
+
+  @@unique([user_id, book_id])
+  @@index([book_id], map: "fk_liked_books_book")
+}
+
+model payments {
+  pay_id  Int      @id @default(autoincrement())
+  user_id Int
+  book_id Int
+  amount  Decimal  @db.Decimal(10, 2)
+  status  String   @db.VarChar(20)
+  paid_at DateTime @default(now()) @db.Timestamp(3)
+  books   books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade, map: "fk_payments_book")
+  users   users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_payments_user")
+
+  @@index([book_id], map: "fk_payments_book")
+  @@index([user_id], map: "fk_payments_user")
+}
+
+model replies {
+  reply_id   Int      @id @default(autoincrement())
+  comment_id Int
+  user_id    Int
+  content    String   @db.Text
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+  comments   comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_replies_comment")
+  users      users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_replies_user")
+
+  @@index([comment_id], map: "comment_id_reply_idx")
+  @@index([user_id], map: "user_id_reply_idx")
+}
+
+model user_books {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  book_id      Int
+  purchased_at DateTime @default(now()) @db.Timestamp(3)
+  books        books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade, map: "fk_user_books_book")
+  users        users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_user_books_user")
+
+  @@unique([user_id, book_id])
+  @@index([book_id], map: "fk_user_books_book")
+}
