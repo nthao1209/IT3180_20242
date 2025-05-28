@@ -1,7 +1,7 @@
 // app/(home)/search/page.tsx
 'use client';
 
-import { useState, FormEvent, useEffect, useCallback } from 'react'; // Thêm useCallback
+import { useState, FormEvent, useEffect, useCallback } from 'react'; // Thêm useCallback    
 // Đảm bảo searchBooks và BookSearchResult được import đúng
 import { searchBooks, type PaginatedBookSearchResult, type BookSearchResult } from '@/actions/actions'; // Import kiểu mới
 import { useSearchParams, useRouter } from 'next/navigation';
