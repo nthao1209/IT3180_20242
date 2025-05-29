@@ -1,7 +1,7 @@
 
 import React from 'react'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'
-import { Library, MapIcon, PartyPopper, Receipt, User2 } from 'lucide-react'
+import { Library } from 'lucide-react'
 import Link from 'next/link'
 
 const menu_items = [

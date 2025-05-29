@@ -12,7 +12,7 @@ import { Button } from './ui/button'
 import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown, Loader } from 'lucide-react'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
-import { addBook, addPhoto, deletePhoto, getCategories, updateBook } from '@/actions/actions'
+import { addBook, addPhoto, deletePhoto, getCategories, updateBook, requestUpdateBook, requestAddBook } from '@/actions/actions'
 import { toast } from 'sonner'
 import ImageDropzone from './image-dropzone'
 import FileDropzone from './file-dropzone'
@@ -104,11 +104,13 @@ function AddBookDialog({ open, setOpen, book }: props) {
             let message = 'Book added'
 
             if (book) {
-                await updateBook({...values, path})
+                await requestUpdateBook({...values, path})
                 message = 'book updated'
                 setOpen(false)
             } else {
-                await addBook({ ...values, path })
+                await addBook({...values, path})
+                await requestAddBook({ ...values, path })
+           
             }
 
             toast.success(message)

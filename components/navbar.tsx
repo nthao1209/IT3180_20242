@@ -60,8 +60,8 @@ function Navbar() {
           </NavigationMenu>
         </div>
         <div>
-          {<UserButton />}
-          <User2Icon size={16}/>
+          <UserButton />
+          {/* <User2Icon size={16}/> */}
         </div>
 
       </div>

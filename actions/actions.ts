@@ -11,9 +11,163 @@ import { formatAmountForStripe } from "@/lib/utils"
 import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import { Gender } from '@prisma/client';
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//              Author
+////////////////////////////////////////////////////////////////////////////////
+// async function checkAuthorRole(bookId: number) {
+//     const session = await auth();
+//     if (!session || session.user.role !== "author") {
+//       throw new Error("Unauthorized");
+//     }
+//     const book = await prisma.books.findUnique({
+//       where: { book_id: bookId },
+//       select: { author_id: true },
+//     });
+//     if (!book || book.author_id !== session.user.user_id) {
+//       throw new Error("Unauthorized");
+//     }
+//   }
+  
+export async function requestAddBook({
+    id,
+    name,
+    isbn,
+    category,
+    path,
+    published_date,
+    price,
+    file_path
+  }: {
+    id: number,
+    name: string
+    isbn: string
+    category: number[]
+    path: string,
+    photos: string[],
+    published_date: number,
+    price: number,
+    file_path: string
+  }) {
+   
+    try {
+        await prisma.book_requests.create({
+            data: {
+            book_id: id,
+            // author_id: (await auth())!.user.user_id,
+            author_id: 1,
+            action: "add",
+            details: JSON.stringify({
+                name,
+                isbn,
+                category,
+                file_path,
+                price,
+                published_date,
+            }),
+            status: "pending",
+            },
+        });
+        revalidatePath(path);
+        return { message: "Update book request submitted" };
+    } catch (error) {
+        throw error
+    }
+    
+  
+    
+  }
+ 
+export async function requestUpdateBook({
+    id,
+    name,
+    isbn,
+    category,
+    path,
+    published_date,
+    price,
+    file_path
+  }: {
+    id: number,
+    name: string
+    isbn: string
+    category: number[]
+    path: string,
+    photos: string[],
+    published_date: number,
+    price: number,
+    file_path: string
+  }) {
+    try {
+        await prisma.book_requests.create({
+            data: {
+            book_id: id,
+            // author_id: (await auth())!.user.user_id,
+            author_id: 1,
+            action: "update",
+            details: JSON.stringify({
+                name,
+                isbn,
+                category,
+                file_path,
+                price,
+                published_date,
+            }),
+            status: "pending",
+            },
+        });
+        revalidatePath(path);
+        return { message: "Update book request submitted" };
+    } catch (error) {
+        throw error
+    }
+    
+
+  }
+  
+  export async function requestDeleteBook(book_id: number, path: string) {
+    const session = await auth();
+  
+    const existingRequest = await prisma.book_requests.findFirst({
+      where: {
+        book_id,
+        action: "delete",
+        status: "pending",
+      },
+    });
+  
+    if (existingRequest) {
+      throw new Error("A delete request is already pending for this book");
+    }
+  
+    await prisma.book_requests.create({
+      data: {
+        book_id,
+        // author_id: session.user.user_id,
+        author_id: 1,
+        action: "delete",
+        details: "{}",
+        status: "pending",
+      },
+    });
+    await prisma.books.update({
+        where: {
+            book_id: book_id
+        },
+        data: {
+          state: false
+        }
+    })
+  
+    revalidatePath(path);
+    return { message: "Delete book request submitted" };
+  }
 ////////////////////////////////////////////////////////////////////////////////
 //              Book
 ////////////////////////////////////////////////////////////////////////////////
+
 
 
 export async function addBook({
@@ -21,29 +175,52 @@ export async function addBook({
     isbn,
     category,
     path,
-    author,
+    photos,
     price,
+    published_date,
     file_path
 }: {
     name: string
     isbn: string
     category: number[]
     path: string,
-    author: string,
+    photos: string[],
     price: number,
+    published_date: number,
     file_path: string
 }) {
+    // Validate required fields
+    if (!name || !isbn ) {
+        throw new Error('Name, ISBN and author are required fields')
+    }
 
+    if (isbn.length < 10 || isbn.length > 13) {
+        throw new Error('ISBN must be between 10 and 13 characters')
+    }
+
+    if (!category || category.length === 0) {
+        throw new Error('At least one category is required')
+    }
+
+    const existingBook = await prisma.books.findFirst({ where: { isbn } });
+    const existingRequest = await prisma.book_requests.findFirst({
+         where: { details: { contains: `"isbn":"${isbn}"` }, status: "pending" },
+    });
+    if (existingBook || existingRequest) {
+        throw new Error("ISBN already exists");
+    }
+
+ 
     try {
-
         await prisma.$transaction(async t => {
-
             const book = await t.books.create({
                 data: {
                     name: name,
                     isbn: isbn,
-                    author: author,
+                    // author_id: (await auth())!.user.user_id,
+                    author_id: 1,
                     price: price,
+                    published_date: published_date,
                     file_path: file_path
                 }
             })
@@ -56,11 +233,18 @@ export async function addBook({
 
                 await t.book_category_links.createMany({ data })
             }
+            if (photos && photos.length > 0) {
+                const data = photos.map(photo => ({
+                    book_id: book.book_id,
+                    url: photo
+                }))
 
+                await t.book_photos.createMany({ data })
+            }
             revalidatePath(path)
         })
-        
     } catch(error) {
+        console.error('Error adding book:', error)
         throw error
     }
 }
@@ -71,7 +255,6 @@ export async function updateBook({
     isbn,
     category,
     path,
-    author,
     published_date,
     price,
     file_path
@@ -81,14 +264,14 @@ export async function updateBook({
     isbn: string
     category: number[]
     path: string,
-    author: string,
+    photos: string[],
     published_date: number,
     price: number,
     file_path: string
 }) {
 
     try {
-
+      
         await prisma.$transaction(async t => {
 
             const book = await t.books.update({
@@ -98,10 +281,9 @@ export async function updateBook({
                 data: {
                     name: name,
                     isbn: isbn,
-                    author: author,
                     file_path: file_path,
-                    price: price
-                    // published_date: published_date
+                    price: price,
+                    published_date: published_date
                 }
             })
 
