@@ -8,7 +8,11 @@ import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { addCategory, updateCategory } from '@/actions/actions'
 import { usePathname } from 'next/navigation'
+<<<<<<< HEAD
 import { toast } from 'sonner'
+=======
+import { useToast } from '@/hooks/use-toast'
+>>>>>>> origin/author
 import { Category } from '@/app/(admin)/admin/categories/columns'
 type Props = {
     open: boolean,
@@ -24,6 +28,10 @@ const formSchema = z.object({
 })
 
 function AddCategoryDialog({ setOpen, open, category }: Props) {
+<<<<<<< HEAD
+=======
+    const { toast } = useToast()
+>>>>>>> origin/author
     const path = usePathname()
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -48,12 +56,24 @@ function AddCategoryDialog({ setOpen, open, category }: Props) {
                 await addCategory(values.name, path)
             }
             
+<<<<<<< HEAD
             toast(  message)
+=======
+            toast({
+                description: message
+            })
+>>>>>>> origin/author
             form.reset()
 
         } catch(error) {
             console.log(error)
+<<<<<<< HEAD
             toast('Failed to perform action')
+=======
+            toast({
+                description: 'Failed to perform action',
+            })
+>>>>>>> origin/author
         }
 
     }

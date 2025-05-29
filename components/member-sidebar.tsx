@@ -1,24 +1,25 @@
 import React from 'react'
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'
-import { Library, MapIcon, PartyPopper, Receipt, User2, Home, Settings } from 'lucide-react'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'
+import { BookCheck, Home, IdCard, Library, MapIcon, PartyPopper, Settings, Stamp } from 'lucide-react'
 import Link from 'next/link'
 import UserButton from './user-button'
 
+// Menu items.
 const menu_items = [
     {
-        title: 'Home',
-        url: '/',
-        icon: Home
+        title: "Home",
+        url: "/",
+        icon: Home,
     },
     {
-        title: 'Catalog',
-        url: '/catalog',
-        icon: Library
+        title: "Catalog",
+        url: "/cataloge",
+        icon: Library,
     },
     {
-        title: 'Locations',
-        url: '/locations',
-        icon: MapIcon
+        title: "Locations",
+        url: "/locations",
+        icon: MapIcon,
     },
     {
         title: "Activities",

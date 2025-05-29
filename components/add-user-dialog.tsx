@@ -44,6 +44,10 @@ function AddUserDialog({ open, setOpen, user }: Props) {
         defaultValues: {
             name: "",
             email: '',
+<<<<<<< HEAD
+=======
+            library_card_no: '',
+>>>>>>> origin/author
             role: 'member',
             is_active: true
         }

@@ -87,7 +87,6 @@ model book_category_links {
   @@index([category_id], map: "category_id")
 }
 
-
 model ratings {
   rating_id  Int      @id @default(autoincrement())
   book_id    Int
@@ -172,8 +171,9 @@ model book_requests {
   details    String?  @db.Text
   status     String   @default("pending") @db.VarChar(20)
   created_at DateTime @default(now()) @db.Timestamp(0)
-  users      users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade, map: "book_requests_author_id_fkey")
-  books      books?   @relation(fields: [book_id], references: [book_id],  map: "book_requests_book_id_fkey")
+  users      users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  books      books?   @relation(fields: [book_id], references: [book_id])
 
-
+ // @@index([author_id], map: "book_requests_author_id_fkey")
+ // @@index([book_id], map: "book_requests_book_id_fkey")
 }

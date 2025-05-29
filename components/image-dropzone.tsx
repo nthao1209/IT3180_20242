@@ -193,5 +193,4 @@ function ImageDropzone({
     )
 }
 
-
 export default ImageDropzone
