@@ -2,7 +2,7 @@ import AuthorSidebar from "@/components/author-sidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
 
 
-function AdminLayout({ children }: {
+function AuthorLayout({ children }: {
     children: React.ReactNode
 }) {
   return (
@@ -19,4 +19,4 @@ function AdminLayout({ children }: {
   )
 }
 
-export default AdminLayout
+export default AuthorLayout

@@ -5,6 +5,11 @@ import { ColumnDef, StringOrTemplateHeader } from "@tanstack/react-table"
 import { Check, CircleOff } from "lucide-react"
 import Image from "next/image"
 
+type Photo = {
+    photo_id: number,
+    url: string
+}
+
 
 export type Book = {
     book_id: number,
@@ -13,11 +18,20 @@ export type Book = {
     file_path: string,
     price: number,
     book_category_links?: { category_id: number }[],
+    book_photos?: Photo[],
     published_date: number,
-    author: string
+    author: string,
+    state: Boolean
 }
 
 export const columns: ColumnDef<Book>[] = [
+    {
+        accessorKey: 'book_photos',
+        enableSorting: false,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Image" />,
+        cell: ({ row }) => ((row.getValue('book_photos') as unknown) as Photo[]).length > 0 && <Image width={40} height={0} alt="" 
+        src={((row.getValue('book_photos') as unknown) as Photo[]).map(p => p.url).pop()!} />
+    },
     {
         accessorKey: 'name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
@@ -27,7 +41,7 @@ export const columns: ColumnDef<Book>[] = [
         accessorKey: 'isbn',
         enableSorting: false,
         header: ({ column }) => <DataTableColumnHeader column={column} title="ISBN" />,
-        cell: ({ row }) => formatISBN(row.getValue('isbn'))
+        cell: ({ row }) => <p>{formatISBN(row.getValue('isbn'))}</p>
     },
     {
         accessorKey: 'published_date',
@@ -41,19 +55,14 @@ export const columns: ColumnDef<Book>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Price" />,
         cell: ({ row }) => <p className="capitalize">{row.getValue('price')}</p>
     },
-    // {
-    //     accessorKey: 'no_of_copies',
-    //     enableSorting: false,
-    //     header: ({ column }) => <DataTableColumnHeader column={column} title="No of copies" />
-    // },
-    // {
-    //     accessorKey: 'is_active',
-    //     enableSorting: false,
-    //     header: ({ column }) => <DataTableColumnHeader column={column} title="Active" />,
-    //     cell: ({ row }) => (
-    //         row.getValue('is_active') ? <Check size={16} className="text-green-500" />
-    //         : <CircleOff size={16} className="text-red-500" />
-    //     )
-    // },
+    {
+        accessorKey: 'state',
+        enableSorting: false,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="State" />,
+        cell: ({ row }) => (
+          <p className="capitalize">{row.getValue('state') ? 'Done' : 'Wait'}</p>
+        )
+      },
+    
     createRowActions<Book>()
 ]

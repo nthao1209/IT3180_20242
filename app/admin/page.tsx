@@ -1,7 +1,7 @@
 import AddBookButton from '@/components/add-book-button'
 import React from 'react'
-import CatalogTable from './(cataloge)/catalog-table'
 import { prisma } from '@/lib/prisma'
+import CatalogTable from '@/app/(author)/author/(cataloge)/catalog-table'
 
 async function AdminPage({
   searchParams
@@ -13,12 +13,12 @@ async function AdminPage({
 
   const [books, total] = await prisma.$transaction([
     prisma.books.findMany({
-      skip: offset, take: take,
+       skip: offset, take: take,
       select: {
         book_id: true,
         name: true,
-        isbn: true,
-        publish_year: true, 
+        isbn: true, 
+        published_date: true, 
         author: true,
         book_photos: {
           select: {
