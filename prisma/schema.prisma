@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/@prisma/client"
+  output   = "../node_modules/.prisma/client"
   previewFeatures = ["typedSql"]
 }
 
@@ -53,7 +53,7 @@ model books {
   book_category_links book_category_links[]
   ratings       ratings[]
   comments      comments[]
-  book_photos         book_photos[]
+  book_photos   book_photos[]
   payments      payments[]
   user_books    user_books[]
   liked_books liked_books[]
