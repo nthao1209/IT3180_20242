@@ -34,6 +34,7 @@ model users {
   author_books books[]
   liked_books liked_books[]
   book_requests book_requests[]
+  reading_sessions reading_sessions[]
 }
 
 model books {
@@ -42,7 +43,6 @@ model books {
   name         String    @db.VarChar(200)
   author_id     Int
   users      users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "author_book")
-
   description   String?   @db.Text
   published_date Int 
   cover_image   String?   @db.VarChar(255)
@@ -57,7 +57,24 @@ model books {
   payments      payments[]
   user_books    user_books[]
   liked_books liked_books[]
+  totalPages          Int?
   book_requests       book_requests[]
+  reading_sessions    reading_sessions[]
+
+}
+model reading_sessions {
+  session_id          String   @id @default(cuid()) 
+  user_id             Int
+  book_id             Int
+  last_location       String?
+  last_read_timestamp DateTime @updatedAt 
+
+  users               users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  books               books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade)
+
+  @@unique([user_id, book_id]) 
+  @@index([user_id])
+  @@index([book_id])
 }
 
 model book_photos {

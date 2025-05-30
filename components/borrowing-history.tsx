@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/search-and-read
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { formatISBN, getDateWithOffset } from '@/lib/utils'
@@ -64,6 +67,7 @@ async function BorrowingHistory() {
     )
 }
 
+<<<<<<< HEAD
 export default BorrowingHistory
 =======
 import { auth } from "@/auth";
@@ -144,3 +148,6 @@ async function BorrowingHistory() {
 
 export default BorrowingHistory;
 >>>>>>> origin/author
+=======
+export default BorrowingHistory
+>>>>>>> origin/search-and-read

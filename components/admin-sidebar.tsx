@@ -7,13 +7,19 @@ import UserButton from './user-button'
 const menu_items = [
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/search-and-read
         title: 'Catalog',
         url: '/admin',
         icon: Library
     },
     {
+<<<<<<< HEAD
 >>>>>>> origin/author
+=======
+>>>>>>> origin/search-and-read
         title: 'Categories',
         url: '/admin/categories',
         icon: MapIcon
@@ -63,10 +69,14 @@ function AdminSidebar() {
             <SidebarMenu>
                 <SidebarMenuItem>
 <<<<<<< HEAD
+<<<<<<< HEAD
                     { <UserButton /> }
 =======
                     <UserButton />
 >>>>>>> origin/author
+=======
+                    <UserButton />
+>>>>>>> origin/search-and-read
                 </SidebarMenuItem>
             </SidebarMenu>
         </SidebarFooter>

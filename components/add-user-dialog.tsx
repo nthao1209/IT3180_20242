@@ -45,9 +45,13 @@ function AddUserDialog({ open, setOpen, user }: Props) {
             name: "",
             email: '',
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             library_card_no: '',
 >>>>>>> origin/author
+=======
+            library_card_no: '',
+>>>>>>> origin/search-and-read
             role: 'member',
             is_active: true
         }

@@ -53,7 +53,11 @@ const TabsContent = React.forwardRef<
 TabsContent.displayName = TabsPrimitive.Content.displayName
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 export { Tabs, TabsList, TabsTrigger, TabsContent }
 =======
 export { Tabs, TabsList, TabsTrigger, TabsContent }
 >>>>>>> origin/author
+=======
+export { Tabs, TabsList, TabsTrigger, TabsContent }
+>>>>>>> origin/search-and-read

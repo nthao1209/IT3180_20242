@@ -20,7 +20,11 @@ const Textarea = React.forwardRef<
 Textarea.displayName = "Textarea"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 export { Textarea }
 =======
 export { Textarea }
 >>>>>>> origin/author
+=======
+export { Textarea }
+>>>>>>> origin/search-and-read
