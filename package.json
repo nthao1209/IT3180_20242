@@ -48,6 +48,7 @@
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.56.3",
+    "react-loader-spinner": "^6.1.6",
     "react-reader": "^2.0.13",
     "sonner": "^2.0.3",
     "stripe": "^18.1.0",

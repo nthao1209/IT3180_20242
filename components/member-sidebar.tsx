@@ -45,12 +45,11 @@ function MemberSidebar() {
 
                           <SidebarMenuItem key={item.title}>
                               <SidebarMenuButton asChild>
-                                  <Link href={item.url} legacyBehavior>
-                                    <a>
-                                      <item.icon />
-                                      <span>{item.title}</span>
-                                    </a>
+                                  <Link href={item.url} className="flex items-center gap-2">
+                                    <item.icon />
+                                    <span>{item.title}</span>
                                   </Link>
+
                               </SidebarMenuButton>
                           </SidebarMenuItem>
                       ))

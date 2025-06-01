@@ -28,37 +28,6 @@ function Navbar() {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Library resources</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className='flex flex-col p-4 md:w-[400px] lg:w-[500px]'>
-                    <li>
-                      <Link
-                        href='library-card'
-                        className='block space-y-1 p-3 rounded hover:bg-accent'
-                        legacyBehavior>
-                        <a>
-                        <div className='font-medium leading-none'>Library card</div>
-                        <p className='text-sm text-muted-foreground'>Use your library card to borrow materials, access digital resources, and explore library technology.</p>
-                        </a>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href='book-a-room'
-                        className='block space-y-1 p-3 rounded hover:bg-accent'
-                        legacyBehavior>
-                        <div className='font-medium leading-none'>Book a room</div>
-                        <p className='text-sm text-muted-foreground'>Book a room for a meeting or group discussions.</p>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href='equipment-rental'
-                        className='block space-y-1 p-3 rounded hover:bg-accent'
-                        legacyBehavior>
-                        <div className='font-medium leading-none'>Equipment rental</div>
-                        <p className='text-sm text-muted-foreground'>Rent 3D printers, projectors and more.</p>
-                      </Link>
-                    </li>
-                  </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
             </NavigationMenuList>
