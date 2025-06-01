@@ -38,87 +38,35 @@ export default async function HomePage() {
 
   return (
     <>
-      <div className="container mx-auto p-16 sm:p-32 flex flex-col justify-center space-y-16">
+      {/* Bỏ flex flex-col justify-center từ đây */}
+      <div className="container mx-auto p-8 md:p-12 lg:p-16 space-y-12 md:space-y-16">
         {/* new arrivals */}
-        <div>
-          <h2 className="text-2xl font-bold pb-4 pl-4">New arrivals</h2>
-          <Carousel
-            opts={{
-              slidesToScroll: 'auto',
-              align: 'start'
-            }}
-            className="flex w-full min-w-xl"
-          >
-            <CarouselContent>
-              {
-                arrivals.map(arrival => (
-                  <CarouselItem key={arrival.book_id} className='basis-auto'>
-                    <Link href={`/book/${arrival.book_id}`}>
-                      <Image
-                        className="h-[200px] w-[150px] sm:w-[200px] sm:h-[290px]"
-                        src={arrival.book_photos && arrival.book_photos.length > 0 ? arrival.book_photos[0].url : '/placeholder-book.jpg'}
-                        width={190}
-                        height={0}
-                        alt={arrival.name} />
-                    </Link>
-                  </CarouselItem>
-                ))
-              }
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        </div>
-
-
+        {arrivals.length > 0 && ( // Thêm kiểm tra arrivals.length
+          (<section>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">New arrivals</h2>
+            {/* ... Carousel ... */}
+          </section>)
+        )}
 
         {/* recently reviewed */}
-        <div>
-          <h2 className="text-2xl font-bold pb-4 pl-4">Recently reviewed</h2>
-          <Carousel
-            opts={{
-              slidesToScroll: 'auto',
-              align: 'start'
-            }}
-            className="flex w-full min-w-xl"
-          >
-            <CarouselContent>
-              {
-                recently_reviewed.map(rr => (
-                  <CarouselItem key={rr.book_id} className='basis-auto'>
-                    <Link href={`/book/${rr.book_id}`}>
-                      <Image
-                        className="h-[200px] w-[150px] sm:w-[200px] sm:h-[290px]"
-                        src={rr.books.book_photos[0].url}
-                        width={190}
-                        height={0}
-                        alt={rr.books.name} />
-                    </Link>
-                    <Rating rating={rr.rating} />
-                  </CarouselItem>
-                ))
-              }
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        </div>
+        {recently_reviewed.length > 0 && ( // Thêm kiểm tra
+          (<section>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">Recently reviewed</h2>
+            {/* ... Carousel ... */}
+          </section>)
+        )}
 
-        {/* staff picks */}
+        {/* staff picks - XÓA HOÀN TOÀN NẾU KHÔNG CÓ DỮ LIỆU */}
+        {/* 
         <div>
           <h2 className="text-2xl font-bold pb-4 pl-4">Staff picks</h2>
-          <Carousel
-            opts={{
-              slidesToScroll: 'auto',
-              align: 'start'
-            }}
-            className="flex w-full min-w-xl"
-          >
-           
+          <Carousel ... >
+            <CarouselContent></CarouselContent> // Để trống nếu không có dữ liệu
             <CarouselPrevious />
             <CarouselNext />
           </Carousel>
         </div>
+        */}
       </div>
     </>
   );

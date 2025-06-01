@@ -111,31 +111,27 @@ export default async function CatalogPage({
       <h1 className="text-3xl font-bold mb-6 md:mb-8 text-center text-gray-800">
         Book Catalog
       </h1>
-
       {/* Hiển thị thông báo nếu không có sách */}
       {totalBooks === 0 ? ( // Kiểm tra tổng số sách
-        <p className="text-center text-gray-500">
-          Hiện tại chưa có sách nào trong danh mục.
-        </p>
+        (<p className="text-center text-gray-500">Hiện tại chưa có sách nào trong danh mục.
+                  </p>)
       ) : books.length === 0 && currentPage > 1 ? ( // Nếu trang hiện tại không có sách (ví dụ: người dùng nhập URL page quá lớn)
-         <p className="text-center text-gray-500">
-           Không tìm thấy sách ở trang này. Vui lòng quay lại trang trước.
-         </p>
+         (<p className="text-center text-gray-500">Không tìm thấy sách ở trang này. Vui lòng quay lại trang trước.
+                    </p>)
       ) : (
         // Hiển thị danh sách sách nếu có
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        (<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {books.map((book) => (
             <BookCard key={book.book_id} book={book} />
           ))}
-        </div>
+        </div>)
       )}
-
       {/* HIỂN THỊ PAGINATION CONTROLS NẾU CÓ NHIỀU HƠN 1 TRANG */}
       {totalPages > 1 && ( // Chỉ hiển thị nếu có nhiều hơn 1 trang
-         <PaginationControls
+         (<PaginationControls
              currentPage={currentPage}
              totalPages={totalPages}
-         />
+         />)
       )}
     </div>
   );

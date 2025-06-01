@@ -2,61 +2,67 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-// Định nghĩa kiểu cho prop 'book'
-// Kiểu này nên khớp với dữ liệu sách bạn thường lấy từ Prisma
-// Bao gồm cả book_photos và các trường cần thiết khác
-interface Book {
+// Import kiểu BookAuthorInfo nếu bạn đã export nó từ actions.ts
+// Hoặc định nghĩa lại ở đây nếu cần
+interface BookAuthorInfo {
+  user_id: number;
+  name: string | null;
+}
+
+// Định nghĩa kiểu cho prop 'book' để khớp với BookSearchResult
+interface BookCardBook { // Đổi tên để tránh nhầm lẫn với kiểu Book gốc nếu có
+  cover_image: string | null; // Thêm trường này
   book_id: number;
   name: string | null;
-  author: string | null;
-  book_photos: { url: string }[]; // Mảng các ảnh, mỗi ảnh có url
-  // Thêm các trường khác nếu bạn muốn hiển thị trên card, ví dụ:
-  // price?: number | Prisma.Decimal;
-  // ratings_avg?: number | null;
+  author: BookAuthorInfo | null; // THAY ĐỔI Ở ĐÂY: author giờ là object hoặc null
+  book_photos: { url: string }[];
+  // Thêm các trường khác từ BookSearchResult nếu BookCard cần hiển thị chúng
+  // Ví dụ: price: number; description: string | null;
 }
 
 interface BookCardProps {
-  book: Book;
+  book: BookCardBook; // Sử dụng kiểu mới
 }
 
 export default function BookCard({ book }: BookCardProps) {
-  const coverImage = book.book_photos && book.book_photos.length > 0 
-                    ? book.book_photos[0].url 
-                    : '/default-book-cover.png'; // Ảnh bìa mặc định
-
+  const imageToDisplay = book.cover_image // Ưu tiên cover_image
+                       || (book.book_photos && book.book_photos.length > 0 ? book.book_photos[0].url : null) // Fallback về ảnh đầu tiên trong book_photos
+                       || '/default-book-cover.png'; // Fallback cuối cùng
   return (
     <div 
-      key={book.book_id} // key có thể không cần ở đây nếu BookCard được dùng trong .map ở component cha
       className="border border-gray-200 bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out flex flex-col transform hover:-translate-y-1"
     >
-      <Link href={`/book/${book.book_id}`} className="block group h-full flex flex-col">
-        <div className="relative w-full aspect-[2/3] bg-gray-100"> {/* aspect-[2/3] cho tỉ lệ bìa sách phổ biến */}
+      <Link
+        href={`/book/${book.book_id}`}
+        className="block group h-full flex flex-col"
+        legacyBehavior>
+        <a>
+        <div className="relative w-full aspect-[2/3] bg-gray-100">
           <Image
-            src={coverImage}
+            src={imageToDisplay}
             alt={book.name || 'Book cover'}
-            fill // Để ảnh tự điều chỉnh kích thước theo div cha
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw" // Giúp Next.js tối ưu ảnh
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
-        <div className="p-3 flex-grow flex flex-col justify-between"> {/* flex-grow và flex-col để đẩy nội dung xuống dưới nếu card có chiều cao cố định */}
+        <div className="p-3 flex-grow flex flex-col justify-between">
           <div>
             <h3 
               className="text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-200 truncate" 
-              title={book.name || ""} // Hiển thị đầy đủ tên sách khi hover
+              title={book.name || ""}
             >
               {book.name || "Untitled Book"}
             </h3>
             <p 
               className="text-xs text-gray-500 mt-1 truncate" 
-              title={book.author || ""} // Hiển thị đầy đủ tên tác giả khi hover
+              title={book.author?.name || ""} // SỬA Ở ĐÂY: Truy cập book.author.name
             >
-              {book.author || "Unknown Author"}
+              {book.author?.name || "Unknown Author"} {/* SỬA Ở ĐÂY */}
             </p>
-            {/* Bạn có thể thêm các thông tin khác ở đây nếu muốn, ví dụ: giá, rating */}
           </div>
-          {/* Có thể thêm nút "Add to cart" hoặc "View details" nhỏ ở đây nếu cần */}
         </div>
+        </a>
       </Link>
     </div>
   );

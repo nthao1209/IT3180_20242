@@ -1,76 +1,13 @@
-import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma" // hoặc đường dẫn đến Prisma client của bạn
-import bcrypt from "bcrypt"
+// app/api/auth/[...nextauth]/route.ts
 
-export default NextAuth({
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials: Partial<Record<"email" | "password", unknown>>) {
-        if (!credentials?.email || !credentials?.password) return null
+// 1. XÓA TOÀN BỘ NỘI DUNG HIỆN TẠI CỦA FILE NÀY.
 
-        const user = await prisma.users.findUnique({
-          where: { email: credentials.email as string }
-        })
+// 2. THAY THẾ BẰNG CODE SAU:
 
-        if (!user) return null
+import { handlers } from "@/auth"; // Đảm bảo đường dẫn này trỏ đúng đến file auth.ts của bạn
+                                 // Nếu auth.ts ở thư mục gốc, đường dẫn có thể là "../../../../auth"
+                                 // (đi lên 4 cấp từ app/api/auth/[...nextauth]/)
+                                 // Hoặc nếu bạn đã cấu hình path alias "@/" trỏ đến thư mục gốc,
+                                 // thì "@/auth" có thể đúng nếu file auth.ts của bạn là your-project-root/auth.ts
 
-        const isValid = await bcrypt.compare(credentials.password as string, user.password)
-        if (!isValid) return null
-
-        return {
-          id: user.user_id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role
-        }
-      }
-    })
-  ],
-  callbacks: {
-    async session({ session, token }) {
-      // Mỗi lần lấy session sẽ fetch user mới nhất từ DB
-      if (session?.user?.email) {
-        const user = await prisma.users.findUnique({
-          where: { email: session.user.email }
-        })
-        if (user) {
-          session.user.id = user.user_id.toString()
-          session.user.name = user.name
-          session.user.role = user.role
-        }
-      }
-      return session
-    },
-    async jwt({ token, user }) {
-        // Khi login lần đầu, thêm dữ liệu user vào token
-        if (user) {
-        token.id = user.id
-        token.role = user.role
-        }
-
-        // Luôn cập nhật thông tin user mới nhất từ DB
-        if (token?.email) {
-            const updatedUser = await prisma.users.findUnique({
-            where: { email: token.email as string }
-            })
-            if (updatedUser) {
-            token.name = updatedUser.name
-            token.role = updatedUser.role
-            token.id = updatedUser.user_id.toString()
-            }
-        }
-
-        return token
-    }
-  },
-  session: {
-    strategy: "jwt", // hoặc "database" tùy bạn
-  },
-  secret: process.env.NEXTAUTH_SECRET
-})
+export const { GET, POST } = handlers;

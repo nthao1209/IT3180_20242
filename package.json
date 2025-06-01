@@ -37,6 +37,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
+    "epub2": "^3.0.2",
     "firebase": "^11.7.1",
     "lucide-react": "^0.510.0",
     "next": "15.3.2",
@@ -47,6 +48,7 @@
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.56.3",
+    "react-reader": "^2.0.13",
     "sonner": "^2.0.3",
     "stripe": "^18.1.0",
     "tailwind-merge": "^3.3.0",
@@ -58,7 +60,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^5.0.2",
-    "@types/node": "^20",
+    "@types/node": "^20.17.57",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/stripe": "^8.0.416",
@@ -67,6 +69,10 @@
     "eslint-config-next": "15.3.2",
     "prisma": "^6.7.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "prisma": {
+    "seed": "node --loader ts-node/esm --no-warnings prisma/seed.ts"
   }
 }

@@ -25,11 +25,7 @@ async function CommentCard({ book_id }: { book_id: number }) {
                     <div key={rating.rating_id} className="flex flex-col p-2">
                         <div  className="flex items-start space-x-4 p-4 max-w-md sm:max-w-4xl">
                             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-white text-lg font-bold">
-<<<<<<< HEAD
-                                {getAvatarLetter(rating.users.name || '')}
-=======
                                 {getAvatarLetter(rating.users.name)}
->>>>>>> origin/search-and-read
                             </div>
 
                             <div className="flex-1">

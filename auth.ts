@@ -8,19 +8,23 @@ declare module 'next-auth' {
 
     interface Session {
         user:{
+            id: string
             role?: string
             username?: string
         }& DefaultSession['user']
     }
 
     interface User{
+        id: string
         role?:string
         username?: string
     }
 }
 
+
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-    adapter: PrismaAdapter(prisma),
+    //adapter: PrismaAdapter(prisma),
     debug: true,
     providers: [
         Credentials({
@@ -64,7 +68,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     }
             }
 
-                return user
+                return{
+                    ...user,
+                    id: user.user_id.toString(), // next-auth yêu cầu 'id' là string
+                };
             }
         })
     ],
@@ -75,7 +82,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     callbacks: {
         async jwt({ token, user }: { token: any; user?: any }) {
             if(user){
-                token.id = user.id
+                token.id = user.id.toString()
                 token.email = user.email
                 token.name = user.name
                 token.username = user.username
@@ -100,7 +107,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     pages: {
         signIn: '/auth/signin',
     },
-    basePath: '/auth',
+    //basePath: '/auth',
     logger: {
         error(code, ...message) {
             console.error(code, message)

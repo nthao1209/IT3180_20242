@@ -12,38 +12,36 @@ const menu_items = [
 
         function AuthorSidebar() {
             return (
-              
-              <Sidebar variant='floating' className='p-0'>
-                  <SidebarHeader className='p-0 mb-4'>
-                      <p className='text-lg bg-black text-white p-2'>Author</p>
-                  </SidebarHeader>
-                  <SidebarContent>
-                      <SidebarMenu>
-                          {
-                              menu_items.map(item => (
-          
-                                  <SidebarMenuItem key={item.title}>
-                                      <SidebarMenuButton asChild>
-                                          <Link href={item.url}>
-                                              <item.icon />
-                                              <span>{item.title}</span>
-                                          </Link>
-                                      </SidebarMenuButton>
-                                  </SidebarMenuItem>
-                              ))
-                          }
-                      </SidebarMenu>
-                  </SidebarContent>
-                  <SidebarFooter>
-                      <SidebarMenu>
-                          <SidebarMenuItem>
-                              {/* <UserButton /> */}
-                          </SidebarMenuItem>
-                      </SidebarMenu>
-                  </SidebarFooter>
-          
-              </Sidebar>
-            )
+                <Sidebar variant='floating' className='p-0'>
+                    <SidebarHeader className='p-0 mb-4'>
+                        <p className='text-lg bg-black text-white p-2'>Author</p>
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <SidebarMenu>
+                            {
+                                menu_items.map(item => (
+            
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton asChild>
+                                            <Link href={item.url} legacyBehavior>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))
+                            }
+                        </SidebarMenu>
+                    </SidebarContent>
+                    <SidebarFooter>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                {/* <UserButton /> */}
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarFooter>
+                </Sidebar>
+            );
           }
           
           export default AuthorSidebar
