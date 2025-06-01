@@ -54,6 +54,7 @@ TabsContent.displayName = TabsPrimitive.Content.displayName
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 export { Tabs, TabsList, TabsTrigger, TabsContent }
 =======
 export { Tabs, TabsList, TabsTrigger, TabsContent }
@@ -61,3 +62,6 @@ export { Tabs, TabsList, TabsTrigger, TabsContent }
 =======
 export { Tabs, TabsList, TabsTrigger, TabsContent }
 >>>>>>> origin/search-and-read
+=======
+export { Tabs, TabsList, TabsTrigger, TabsContent }
+>>>>>>> origin/rate_cmt

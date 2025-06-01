@@ -1,12 +1,16 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 "use client"
 
 =======
 >>>>>>> origin/search-and-read
+=======
+>>>>>>> origin/rate_cmt
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
@@ -108,6 +112,8 @@ function TableCaption({
   )
 }
 =======
+=======
+>>>>>>> origin/rate_cmt
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
@@ -213,7 +219,10 @@ const TableCaption = React.forwardRef<
   />
 ))
 TableCaption.displayName = "TableCaption"
+<<<<<<< HEAD
 >>>>>>> origin/search-and-read
+=======
+>>>>>>> origin/rate_cmt
 
 export {
   Table,

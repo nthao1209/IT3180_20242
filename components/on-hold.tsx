@@ -73,4 +73,8 @@ async function OnHold() {
   )
 }
 
+<<<<<<< HEAD
 export default OnHold
+=======
+export default OnHold
+>>>>>>> origin/rate_cmt
