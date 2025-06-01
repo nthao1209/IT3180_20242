@@ -19,8 +19,4 @@ const Textarea = React.forwardRef<
 })
 Textarea.displayName = "Textarea"
 
-<<<<<<< HEAD
 export { Textarea }
-=======
-export { Textarea }
->>>>>>> origin/rate_cmt

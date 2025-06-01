@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import ReplyList from "./ReplyList";
 import CommentForm from "./CommentForm";

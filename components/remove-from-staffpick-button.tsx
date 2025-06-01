@@ -1,9 +1,9 @@
-'use client'
+//'use client'
 
-import React from 'react'
-import { Button } from './ui/button'
-import { removeFromStaffPicks } from '@/actions/actions'
-import { usePathname } from 'next/navigation'
+//import React from 'react'
+//import { Button } from './ui/button'
+//import { removeFromStaffPicks } from '@/actions/actions'
+//import { usePathname } from 'next/navigation'
 
 function RemoveFromStaffPickButton({ pick_id }: {pick_id: number}) {
     const path = usePathname()

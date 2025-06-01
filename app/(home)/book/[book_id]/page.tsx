@@ -10,7 +10,7 @@ import { prisma } from '@/lib/prisma'
 import { BookOpen } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { auth } from '@/auth' 
+import { auth } from "@/auth"
 import React from 'react'
 
 type BookCategoryLink = {
@@ -39,8 +39,11 @@ type BookDetails = {
 };
 
 async function BookDetailsPage({ params }: { params: { book_id: number } }) {
-  //const session = await auth()
-  const p = await params
+  const session = await auth()
+      if (!session) return null
+  const  user_id = Number(session.user.id) 
+
+  const p = params
 
   const [book_details, stats, reservation_count]: [BookDetails | null, any, number] = await prisma.$transaction([
     prisma.books.findUnique({

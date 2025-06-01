@@ -919,10 +919,8 @@ export async function addRating(book_id: number, prevState: State, formData: For
         prisma.ratings.create({
             data: {
                 book_id: book_id,
-                user_id: session?.user.user_id,
-                rating: +formData.get('rating')!,
-                review: formData.get('comment')?.toString()
-            }
+                user_id: Number(session?.user.id),
+                rating: +formData.get('rating')!,            }
         })
     ])
 

@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import CommentItem from "./CommentItem";
 import CommentForm from "./CommentForm";
