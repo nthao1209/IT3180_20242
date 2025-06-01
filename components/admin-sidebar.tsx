@@ -1,44 +1,42 @@
 import React from 'react'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'
-import { Library, MapIcon, PartyPopper, Receipt, User2 } from 'lucide-react'
+import { Library, MapIcon, User2, Mail } from 'lucide-react'
 import Link from 'next/link'
 import UserButton from './user-button'
+// import { request } from 'http'
+
 
 const menu_items = [
     {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> origin/search-and-read
         title: 'Catalog',
         url: '/admin',
         icon: Library
     },
     {
-<<<<<<< HEAD
->>>>>>> origin/author
-=======
->>>>>>> origin/search-and-read
         title: 'Categories',
         url: '/admin/categories',
         icon: MapIcon
     },
-    {
-        title: 'Activities',
-        url: '/admin/activities',
-        icon: PartyPopper
-    },
+    // {
+    //     title: 'Activities',
+    //     url: '/admin/activities',
+    //     icon: PartyPopper
+    // },
     {
         title: 'Users',
         url: '/admin/users',
         icon: User2
     },
+    // {
+    //     title: 'Fines',
+    //     url: '/admin/fines',
+    //     icon: Receipt
+    // },
     {
-        title: 'Fines',
-        url: '/admin/fines',
-        icon: Receipt
-    },
+        title: 'Requests',
+        url: '/admin/requests',
+        icon: Mail
+    }
 
 ]
 function AdminSidebar() {
@@ -68,15 +66,7 @@ function AdminSidebar() {
         <SidebarFooter>
             <SidebarMenu>
                 <SidebarMenuItem>
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    { <UserButton /> }
-=======
                     <UserButton />
->>>>>>> origin/author
-=======
-                    <UserButton />
->>>>>>> origin/search-and-read
                 </SidebarMenuItem>
             </SidebarMenu>
         </SidebarFooter>

@@ -1,5 +1,5 @@
 import { auth, signIn } from '@/auth'
-import BorrowingHistory from '@/components/borrowing-history'
+// import BorrowingHistory from '@/components/borrowing-history'
 import Checkout from '@/components/checkout'
 import Fines from '@/components/fines'
 import OnHold from '@/components/on-hold'

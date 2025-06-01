@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 // 'use client'
 
 // import { DataTable } from '@/components/data-table'
@@ -75,6 +76,8 @@
 
 // export default FinesTable
 =======
+=======
+>>>>>>> origin/admin
 'use client'
 
 import { DataTable } from '@/components/data-table'
@@ -149,5 +152,9 @@ function FinesTable({ data }: { data: props }) {
     )
 }
 
+<<<<<<< HEAD
 export default FinesTable
 >>>>>>> origin/rate_cmt
+=======
+export default FinesTable
+>>>>>>> origin/admin

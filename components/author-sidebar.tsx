@@ -23,11 +23,9 @@ const menu_items = [
             
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton asChild>
-                                        <Link href={item.url}>
-                                            <a className="flex items-center gap-2">
+                                        <Link href={item.url} className="flex items-center gap-2">
                                             <item.icon />
                                             <span>{item.title}</span>
-                                            </a>
                                         </Link>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>

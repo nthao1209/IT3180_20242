@@ -4,6 +4,7 @@ import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { CheckIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -33,6 +34,8 @@ function Checkbox({
 =======
 =======
 >>>>>>> origin/rate_cmt
+=======
+>>>>>>> origin/admin
 import { Check } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -58,8 +61,11 @@ const Checkbox = React.forwardRef<
 ))
 Checkbox.displayName = CheckboxPrimitive.Root.displayName
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> origin/author
 =======
 >>>>>>> origin/rate_cmt
+=======
+>>>>>>> origin/admin
 
 export { Checkbox }

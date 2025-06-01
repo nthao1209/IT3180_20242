@@ -33,23 +33,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Áp dụng các class variable của font vào thẻ <html>
-    // Next.js sẽ tự động tạo ra các class này khi bạn cung cấp option `variable`
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en">
       <body
-        // Không cần className font ở đây nữa nếu đã áp dụng cho <html>
-        // Chỉ cần các class tiện ích khác như antialiased
-        className={`antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClientProviders>
-          <SidebarProvider defaultOpen={false}>
-            <MemberSidebar />
-            <SidebarInset>
-              {children}
-            </SidebarInset>
-            <Toaster />
-          </SidebarProvider>
-        </ClientProviders>
+        <SidebarProvider defaultOpen={false}>
+          <MemberSidebar />
+          <main className="w-full">{children}</main>
+        </SidebarProvider>
+       
+        <Toaster />
       </body>
     </html>
   );

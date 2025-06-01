@@ -12,7 +12,7 @@ async function OnHold() {
 
   const results = await prisma.reservations.findMany({
     where: {
-      user_id: session?.user.user_id
+      user_id: Number(session?.user.id)
     },
     include: {
       books: {
@@ -73,8 +73,4 @@ async function OnHold() {
   )
 }
 
-<<<<<<< HEAD
 export default OnHold
-=======
-export default OnHold
->>>>>>> origin/rate_cmt
