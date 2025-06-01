@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model book_categories {
+  category_id         Int                   @id @default(autoincrement())
+  category_name       String                @db.VarChar(255)
+  book_category_links book_category_links[]
+}
+
+model book_category_links {
+  book_id         Int
+  category_id     Int
+  books           books           @relation(fields: [book_id], references: [book_id], onDelete: Cascade, onUpdate: NoAction)
+  book_categories book_categories @relation(fields: [category_id], references: [category_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([book_id, category_id])
+  @@index([category_id], map: "category_id")
+}
+
+model books {
+  book_id             Int                   @id @default(autoincrement())
+  isbn                String                @db.VarChar(13)
+  name                String                @db.VarChar(200)
+  author_id           Int
+  description         String?               @db.Text
+  cover_image         String?               @db.VarChar(255)
+  file_path           String?               @db.VarChar(500)
+  price               Decimal               @default(0.00) @db.Decimal(10, 2)
+  published_date      DateTime?             @db.Date
+  created_at          DateTime              @default(now()) @db.Timestamp(0)
+  book_category_links book_category_links[]
+  book_requests       book_requests[]
+  users               users                 @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  comments            comments[]
+  payments            payments[]
+  ratings             ratings[]
+  user_books          user_books[]
+
+  @@index([author_id], map: "books_author_id_fkey")
+}
+
+model comments {
+  comments_id Int      @id @default(autoincrement())
+  book_id     Int
+  user_id     Int
+  content     String   @db.Text
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  books       books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade)
+  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([book_id], map: "comments_book_id_fkey")
+  @@index([user_id], map: "comments_user_id_fkey")
+}
+
+model payments {
+  pay_id  Int      @id @default(autoincrement())
+  user_id Int
+  book_id Int
+  amount  Decimal  @db.Decimal(10, 2)
+  status  String   @db.VarChar(20)
+  paid_at DateTime @default(now()) @db.Timestamp(0)
+  books   books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade)
+  users   users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([book_id], map: "payments_book_id_fkey")
+  @@index([user_id], map: "payments_user_id_fkey")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ratings {
+  rating_id  Int      @id @default(autoincrement())
+  book_id    Int
+  user_id    Int
+  rating     Int
+  review     String?  @db.Text
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  books      books    @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction)
+  users      users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([book_id], map: "book_id")
+  @@index([user_id], map: "user_id")
+}
+
+model user_books {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  book_id      Int
+  purchased_at DateTime @default(now()) @db.Timestamp(0)
+  books        books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade)
+  users        users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, book_id])
+  @@index([book_id], map: "user_books_book_id_fkey")
+}
+
+model users {
+  user_id       Int             @id @default(autoincrement())
+  username      String          @unique @db.VarChar(50)
+  email         String          @unique @db.VarChar(100)
+  password      String          @db.Text
+  name          String?         @db.VarChar(100)
+  role          String          @db.VarChar(30)
+  created_at    DateTime        @default(now()) @db.Timestamp(0)
+  book_requests book_requests[]
+  books         books[]
+  comments      comments[]
+  payments      payments[]
+  ratings       ratings[]
+  user_books    user_books[]
+}
+
+model book_requests {
+  request_id Int      @id @default(autoincrement())
+  book_id    Int?
+  author_id  Int
+  action     String   @db.VarChar(20)
+  details    String?  @db.Text
+  status     String   @default("pending") @db.VarChar(20)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  users      users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  books      books?   @relation(fields: [book_id], references: [book_id])
+
+  @@index([author_id], map: "book_requests_author_id_fkey")
+  @@index([book_id], map: "book_requests_book_id_fkey")
+}

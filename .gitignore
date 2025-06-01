@@ -1,0 +1,4 @@
+.vs/
+.next/
+node_modules/
+*.vsidx
