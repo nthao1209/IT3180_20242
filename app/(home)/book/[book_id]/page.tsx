@@ -1,7 +1,8 @@
+
 import BackButton from '@/components/back-button'
-import CommentBox from '@/components/comment-box'
 import CommentCard from '@/components/comment-card'
-import CommentList from '@/components/CommentList' // Nhập CommentList
+import CommentBox from '@/components/comment-box'
+import CommentListWrapper from '@/components/CommentListWrapper'
 import HoldButton from '@/components/hold-button'
 import Rating from '@/components/rating'
 import StaffPickButton from '@/components/staff-pick-button'
@@ -24,7 +25,7 @@ type BookDetails = {
   name: string;
   book_id: number;
   isbn: string;
-  author: string | null;
+  author?: string | null;
   description: string | null;
   cover_image: string | null;
   file_path: string | null;
@@ -36,25 +37,25 @@ type BookDetails = {
   ratings?: { rating: number }[];
   book_photos?: { url: string }[];
   book_category_links?: BookCategoryLink[];
+  totalPages?: number | null;
 };
 
 async function BookDetailsPage({ params }: { params: { book_id: number } }) {
   const session = await auth()
-      if (!session) return null
-  const  user_id = Number(session.user.id) 
+  if (!session) return null
+  const user_id = Number(session.user.id)
 
-  const p = params
+  const p = await params;
+  const bookId = +p.book_id;
 
-  const [book_details, stats, reservation_count]: [BookDetails | null, any, number] = await prisma.$transaction([
+  const [raw_book_details, stats, reservation_count]: [any, any, number] = await prisma.$transaction([
     prisma.books.findUnique({
       where: {
         book_id: +p.book_id,
       },
       include: {
         ratings: {
-          select: {
-            rating: true
-          }
+          select: { rating: true }
         },
         book_category_links: {
           include: {
@@ -62,6 +63,9 @@ async function BookDetailsPage({ params }: { params: { book_id: number } }) {
               select: { category_name: true }
             }
           }
+        },
+        book_photos: {
+          select: { url: true }
         }
       }
     }),
@@ -74,6 +78,15 @@ async function BookDetailsPage({ params }: { params: { book_id: number } }) {
       where: { book_id: +p.book_id }
     }),
   ])
+
+  const book_details: BookDetails | null = raw_book_details
+    ? {
+        ...raw_book_details,
+        published_date: raw_book_details.published_date
+          ? new Date(raw_book_details.published_date)
+          : null,
+      }
+    : null;
 
   if (!book_details) {
     return <div>Không tìm thấy sách!</div>
@@ -91,12 +104,12 @@ async function BookDetailsPage({ params }: { params: { book_id: number } }) {
     <div className='max-w-6xl mx-auto'>
       <BackButton />
       <div className="flex flex-col lg:flex-row p-4 pt-16 space-y-8 sm:space-x-4">
-        {book_details?.book_photos?.[0]?.url && (
+        {(book_details.book_photos?.[0]?.url || book_details.cover_image) && (
           <Image
             width={200}
-            height={0}
-            src={book_details.book_photos[0].url}
-            alt='book'
+            height={300}
+            src={book_details.book_photos?.[0]?.url || book_details.cover_image || '/default-book-cover.jpg'}
+            alt={book_details.name}
             className='object-cover h-auto rounded-l-md'
           />
         )}
@@ -143,7 +156,6 @@ async function BookDetailsPage({ params }: { params: { book_id: number } }) {
 
       <Separator className='mt-4 mb-4' />
 
-      {/* Phần đánh giá */}
       <div>
         <h2 className='text-xl font-bold mb-3'>Đánh giá</h2>
         {session?.user ? (
@@ -162,11 +174,10 @@ async function BookDetailsPage({ params }: { params: { book_id: number } }) {
 
       <Separator className='mt-4 mb-4' />
 
-      {/* Phần bình luận */}
       <div>
         <h2 className='text-xl font-bold mb-3'>Bình luận</h2>
         {session?.user ? (
-          <CommentList bookId={book_details.book_id} />
+          <CommentListWrapper bookId={book_details.book_id} />
         ) : (
           <p className='font-bold border rounded-sm p-4'>
             <Link href={`/auth/signin?callbackUrl=/book/${book_details.book_id}`} className='text-blue-500'>

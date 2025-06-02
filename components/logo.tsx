@@ -4,11 +4,13 @@ import React from 'react'
 
 function Logo() {
   return (
-    <Link href="/">
+  <div>
+    <Link href="/" >
       <div className="hidden lg:flex">
         <Image src="/library_logo.png" width={160} height={120} alt="library logo" />
       </div>
     </Link>
+  </div>
   );
 }
 

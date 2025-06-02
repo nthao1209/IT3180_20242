@@ -5,14 +5,9 @@ import { Prisma } from '@prisma/client';
 import { revalidatePath } from "next/cache"
 import bcrypt from 'bcryptjs'
 import { auth, signIn, signOut } from "@/auth"
-import { addDays, addMonths, differenceInCalendarDays } from "date-fns"
 import { z } from "zod"
-import { stripe } from "@/lib/stripe"
-import { formatAmountForStripe } from "@/lib/utils"
 import { redirect } from "next/navigation"
-import { headers } from "next/headers"
 import { Gender } from '@prisma/client';
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -550,7 +545,7 @@ const passwordFormSchema = z.object({
 })
 
 
-export async function updateProfile(state: State | undefined, formData: FormData):Promise<State> {
+export async function updateProfile(state: State | undefined, formData: FormData):Promise<State | undefined> {
   const session = await auth();
 
   if (!session) {
@@ -660,267 +655,305 @@ export async function updateProfile(state: State | undefined, formData: FormData
 
 
 
-////////////////////////////////////////////////////////////////////////////////
-//              Activities
-////////////////////////////////////////////////////////////////////////////////
-export async function addActivity({ title, description, activity_date, start_time, end_time, age_group, capacity, photos, path }:
-    { title: string, description: string, activity_date: Date, start_time: string, end_time: string, age_group: string, capacity: number, photos: string[], path: string }
-) {
+// ////////////////////////////////////////////////////////////////////////////////
+// //              Activities
+// ////////////////////////////////////////////////////////////////////////////////
+// export async function addActivity({ title, description, activity_date, start_time, end_time, age_group, capacity, photos, path }:
+//     { title: string, description: string, activity_date: Date, start_time: string, end_time: string, age_group: string, capacity: number, photos: string[], path: string }
+// ) {
 
-    try {
+//     try {
 
-        await prisma.$transaction(async t => {
-            const result = await t.activities.create({
-                data: {
-                    title: title,
-                    description: description,
-                    activity_date: activity_date,
-                    start_time: start_time,
-                    end_time: end_time,
-                    age_group: age_group,
-                    capacity: capacity
-                }
-            })
+//         await prisma.$transaction(async t => {
+//             const result = await t.activities.create({
+//                 data: {
+//                     title: title,
+//                     description: description,
+//                     activity_date: activity_date,
+//                     start_time: start_time,
+//                     end_time: end_time,
+//                     age_group: age_group,
+//                     capacity: capacity
+//                 }
+//             })
 
-            console.log(result)
-            // save photos
-            if (photos && photos.length > 0) {
-                const data = photos.map(photo => ({
-                    activity_id: result.activity_id,
-                    url: photo
-                }))
+//             console.log(result)
+//             // save photos
+//             if (photos && photos.length > 0) {
+//                 const data = photos.map(photo => ({
+//                     activity_id: result.activity_id,
+//                     url: photo
+//                 }))
 
-                await t.activity_photos.createMany({ data })
-            }
-        })
+//                 await t.activity_photos.createMany({ data })
+//             }
+//         })
 
-        revalidatePath(path)
+//         revalidatePath(path)
 
-    } catch (error) {
-        throw error
-    }
-}
+//     } catch (error) {
+//         throw error
+//     }
+// }
 
-export async function updateActivity({ activity_id, title, description, activity_date, start_time, end_time, age_group, capacity, path }:
-    { activity_id: number, title: string, description: string, activity_date: Date, start_time: string, end_time: string, age_group: string, capacity: number, path: string }
-) {
+// export async function updateActivity({ activity_id, title, description, activity_date, start_time, end_time, age_group, capacity, path }:
+//     { activity_id: number, title: string, description: string, activity_date: Date, start_time: string, end_time: string, age_group: string, capacity: number, path: string }
+// ) {
 
-    try {
+//     try {
 
-        await prisma.$transaction([
-            prisma.activities.update({
-                where: {
-                    activity_id: activity_id
-                },
-                data: {
-                    title: title,
-                    description: description,
-                    activity_date: activity_date,
-                    start_time: start_time,
-                    end_time: end_time,
-                    age_group: age_group,
-                    capacity: capacity
-                }
-            })
-        ])
+//         await prisma.$transaction([
+//             prisma.activities.update({
+//                 where: {
+//                     activity_id: activity_id
+//                 },
+//                 data: {
+//                     title: title,
+//                     description: description,
+//                     activity_date: activity_date,
+//                     start_time: start_time,
+//                     end_time: end_time,
+//                     age_group: age_group,
+//                     capacity: capacity
+//                 }
+//             })
+//         ])
 
-        revalidatePath(path)
+//         revalidatePath(path)
 
-    } catch(error) {
-        throw error
-    }
-}
+//     } catch(error) {
+//         throw error
+//     }
+// }
 
-export async function deleteActivity(id: number, path: string) {
+// export async function deleteActivity(id: number, path: string) {
 
-    try {
+//     try {
 
-        await prisma.$transaction([
-            prisma.activities.delete({
-                where: {
-                    activity_id: id
-                }
-            })
-        ])
+//         await prisma.$transaction([
+//             prisma.activities.delete({
+//                 where: {
+//                     activity_id: id
+//                 }
+//             })
+//         ])
 
-        revalidatePath(path)
+//         revalidatePath(path)
 
-    } catch(error) {
-        throw error
-    }
-}
-////////////////////////////////////////////////////////////////////////////////
-//              Fines
-////////////////////////////////////////////////////////////////////////////////
-export async function markAsPaid(id: number, path: string) {
-    try {
+//     } catch(error) {
+//         throw error
+//     }
+// }
+// ////////////////////////////////////////////////////////////////////////////////
+// //              Fines
+// ////////////////////////////////////////////////////////////////////////////////
+// export async function markAsPaid(id: number, path: string) {
+//     try {
 
-        await prisma.$transaction(async (transaction) => {
-            await transaction.fines.update({
-                where: {
-                    fine_id: id
-                }, 
-                data: {
-                    paid_date: new Date()
-                }
-            })
-        })
+//         await prisma.$transaction(async (transaction) => {
+//             await transaction.fines.update({
+//                 where: {
+//                     fine_id: id
+//                 }, 
+//                 data: {
+//                     paid_date: new Date()
+//                 }
+//             })
+//         })
 
-        revalidatePath(path)
+//         revalidatePath(path)
 
-        return { message: "Fine paid" }
+//         return { message: "Fine paid" }
 
-    } catch (error) {
-        throw error
-    }
-}
+//     } catch (error) {
+//         throw error
+//     }
+// }
 
-export async function deleteFine(id: number, path: string) {
-    try {
+// export async function deleteFine(id: number, path: string) {
+//     try {
 
-        await prisma.$transaction(async (transaction) => {
-            await transaction.fines.delete({
-                where: {
-                    fine_id: id
-                }
-            })
-        })
+//         await prisma.$transaction(async (transaction) => {
+//             await transaction.fines.delete({
+//                 where: {
+//                     fine_id: id
+//                 }
+//             })
+//         })
 
-        revalidatePath(path)
+//         revalidatePath(path)
 
-        return { message: "Fine deleted" }
+//         return { message: "Fine deleted" }
 
-    } catch (error) {
-        throw error
-    }
-}
+//     } catch (error) {
+//         throw error
+//     }
+// }
 
-export async function createCheckoutSession(data: FormData) {
+// export async function createCheckoutSession(data: FormData) {
 
-    const session = await auth()
-    if (!session) throw new Error("you must be logged in")
+//     const session = await auth()
+//     if (!session) throw new Error("you must be logged in")
 
-    const fine_id = +data.get('fine_id')!   
-    const fine = await prisma.fines.findUnique({
-        where: {
-            fine_id: fine_id
-        },
-        include: {
-            borrowings: {
-                include: {
-                    books: {
-                        select: { name: true }
-                    }
-                }
-            }
-        }
-    })
+//     const fine_id = +data.get('fine_id')!   
+//     const fine = await prisma.fines.findUnique({
+//         where: {
+//             fine_id: fine_id
+//         },
+//         include: {
+//             borrowings: {
+//                 include: {
+//                     books: {
+//                         select: { name: true }
+//                     }
+//                 }
+//             }
+//         }
+//     })
 
-    const checkoutSession = await stripe.checkout.sessions.create({
-        mode: 'payment',
-        submit_type: 'pay',
-        metadata: {
-            fine_id: fine_id
-        },
-        line_items: [
-            {
-                quantity: 1,
-                price_data: {
-                    currency: 'cad',
-                    product_data: {
-                        name: `Late return fine for ${fine?.borrowings.books.name}`
-                    },
-                    unit_amount: formatAmountForStripe((fine?.fine_amount as unknown) as number, 'CAD')
-                }
-            }
-        ],
-        success_url: `${(await headers()).get('origin')}/fine/result?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${(await headers()).get('origin')}`
-    })
+//     const checkoutSession = await stripe.checkout.sessions.create({
+//         mode: 'payment',
+//         submit_type: 'pay',
+//         metadata: {
+//             fine_id: fine_id
+//         },
+//         line_items: [
+//             {
+//                 quantity: 1,
+//                 price_data: {
+//                     currency: 'cad',
+//                     product_data: {
+//                         name: `Late return fine for ${fine?.borrowings.books.name}`
+//                     },
+//                     unit_amount: formatAmountForStripe((fine?.fine_amount as unknown) as number, 'CAD')
+//                 }
+//             }
+//         ],
+//         success_url: `${(await headers()).get('origin')}/fine/result?session_id={CHECKOUT_SESSION_ID}`,
+//         cancel_url: `${(await headers()).get('origin')}`
+//     })
 
-    redirect(checkoutSession.url!)
-}
+//     redirect(checkoutSession.url!)
+// }
 
-////////////////////////////////////////////////////////////////////////////////
-//              Photos
-////////////////////////////////////////////////////////////////////////////////
-export async function addPhoto(table: string, entity_id: number, url: string, path: string) {
+// ////////////////////////////////////////////////////////////////////////////////
+// //              Photos
+// ////////////////////////////////////////////////////////////////////////////////
+// export async function addPhoto(table: string, entity_id: number, url: string, path: string) {
 
-    try {
+//     try {
 
-        const newPhoto = await prisma.$transaction( async t => {
+//         const newPhoto = await prisma.$transaction( async t => {
 
-            if (table === 'book') {
-                return await t.book_photos.create({
-                    data: {
-                        book_id: entity_id,
-                        url: url
-                    }
-                })
-            } else if (table === 'activity') {
-                return await t.activity_photos.create({
-                    data: {
-                        activity_id: entity_id,
-                        url: url
-                    }
-                })
-            }
-        })
+//             if (table === 'book') {
+//                 return await t.book_photos.create({
+//                     data: {
+//                         book_id: entity_id,
+//                         url: url
+//                     }
+//                 })
+//             } else if (table === 'activity') {
+//                 return await t.activity_photos.create({
+//                     data: {
+//                         activity_id: entity_id,
+//                         url: url
+//                     }
+//                 })
+//             }
+//         })
 
-        revalidatePath(path)
-        return {photo_id: newPhoto?.photo_id as number, url: newPhoto?.url as string}
+//         revalidatePath(path)
+//         return {photo_id: newPhoto?.photo_id as number, url: newPhoto?.url as string}
 
-    } catch(error) {
-        throw error
-    }
-}
+//     } catch(error) {
+//         throw error
+//     }
+// }
 
-export async function deletePhoto(table: string, id: number, path: string) {
+// export async function deletePhoto(table: string, id: number, path: string) {
 
-    try {
+//     try {
 
-        const result = await prisma.$transaction( async t => {
+//         const result = await prisma.$transaction( async t => {
 
-            if (table === 'book') {
-                await t.book_photos.delete({
-                    where: {
-                        photo_id: id,
-                    }
-                })
-            } else if (table === 'activity') {
-                await t.activity_photos.delete({
-                    where: {
-                        photo_id: id,
-                    }
-                })
-            }
-        })
+//             if (table === 'book') {
+//                 await t.book_photos.delete({
+//                     where: {
+//                         photo_id: id,
+//                     }
+//                 })
+//             } else if (table === 'activity') {
+//                 await t.activity_photos.delete({
+//                     where: {
+//                         photo_id: id,
+//                     }
+//                 })
+//             }
+//         })
 
-        revalidatePath(path)
-        return result
+//         revalidatePath(path)
+//         return result
 
-    } catch(error) {
-        throw error
-    }
-}
+//     } catch(error) {
+//         throw error
+//     }
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 //              Rating
 ////////////////////////////////////////////////////////////////////////////////
-export async function addRating(book_id: number, prevState: State, formData: FormData) {
+export type State = {
+    message?: string | null
+    requireSignOut?: boolean 
+}
 
+export async function addRating(book_id: number, prevState: State, formData: FormData) {
     const session = await auth()
 
     if (!session) {
         return { message: "You must be logged in" }
     }
 
+    const user_id = Number(session.user.id)
+
+    // Kiểm tra xem người dùng đã mua sách chưa
+    const hasPurchased = await prisma.user_books.findFirst({
+        where: {
+            user_id: user_id,
+            book_id: book_id
+        }
+    })
+
+    if (!hasPurchased) {
+        return { message: "You must purchase the book before rating it" }
+    }
+
+    // Kiểm tra xem người dùng đã đánh giá sách này chưa
+    const existingRating = await prisma.ratings.findFirst({
+        where: {
+            user_id: user_id,
+            book_id: book_id
+        }
+    })
+
+    if (existingRating) {
+        return { message: "You have already rated this book" }
+    }
+
+    // Kiểm tra giá trị rating hợp lệ
+    const rating = +formData.get('rating')!
+    if (!rating || rating < 1 || rating > 5) {
+        return { message: "Invalid rating value. Please select a rating between 1 and 5." }
+    }
+
+    // Tạo đánh giá mới
     await prisma.$transaction([
         prisma.ratings.create({
             data: {
                 book_id: book_id,
-                user_id: Number(session?.user.id),
-                rating: +formData.get('rating')!,            }
+                user_id: user_id,
+                rating: rating,
+            }
         })
     ])
 
@@ -930,13 +963,8 @@ export async function addRating(book_id: number, prevState: State, formData: For
 }
 
 
-export type State = {
-    message?: string | null
-    requireSignOut?: boolean 
-}
 
-
-//////////////////////////////////////////////////
+//  ///////////////////////////////////////////////
 //SEARCH BOOK 
 ///////////////////////////////////////////////////
 export type BookAuthorInfo = { // Chỉ lấy các trường cần thiết của tác giả
