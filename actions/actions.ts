@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
 import { revalidatePath } from "next/cache"
 import bcrypt from 'bcryptjs'
 import { auth, signIn, signOut } from "@/auth"
-import { addDays, addMonths, differenceInCalendarDays } from "date-fns"
+// import { addDays, addMonths, differenceInCalendarDays } from "date-fns"
 import { z } from "zod"
 import { stripe } from "@/lib/stripe"
 import { formatAmountForStripe } from "@/lib/utils"
@@ -325,38 +325,38 @@ export async function deleteBook(book_id: number, path: string) {
     revalidatePath(path)
 }
 
-export async function placeHold(book_id: number, path: string) {
-//     const session = await auth()
+// export async function placeHold(book_id: number, path: string) {
+// //     const session = await auth()
     
-//     if (!session) {
-//         throw new Error("You must be logged in")
-//     }
+// //     if (!session) {
+// //         throw new Error("You must be logged in")
+// //     }
 
-//     await prisma.$transaction(t => (
-//         t.reservations.create({
-//             data: {
-//                 book_id: +book_id,
-//                 user_id: session?.user.user_id,
-//                 reservation_date: new Date(),
-//                 expiration_date: addDays(new Date(), 15)
-//             }
-//         })
-//     ))
+// //     await prisma.$transaction(t => (
+// //         t.reservations.create({
+// //             data: {
+// //                 book_id: +book_id,
+// //                 user_id: session?.user.user_id,
+// //                 reservation_date: new Date(),
+// //                 expiration_date: addDays(new Date(), 15)
+// //             }
+// //         })
+// //     ))
 
-//     revalidatePath(path)
-}
+// //     revalidatePath(path)
+// }
 
-export async function cancelHold(id: number, path: string) {
-//     await prisma.$transaction(t => (
-//         t.reservations.delete({
-//             where: {
-//                 reservation_id: id
-//             }
-//         })
-//     ))
+// export async function cancelHold(id: number, path: string) {
+// //     await prisma.$transaction(t => (
+// //         t.reservations.delete({
+// //             where: {
+// //                 reservation_id: id
+// //             }
+// //         })
+// //     ))
 
-//     revalidatePath(path)
-}
+// //     revalidatePath(path)
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 //              Category
@@ -756,12 +756,12 @@ export async function markAsPaid(id: number, path: string) {
     try {
 
         await prisma.$transaction(async (transaction) => {
-            await transaction.fines.update({
+            await transaction.payments.update({
                 where: {
-                    fine_id: id
+                    pay_id: id
                 }, 
                 data: {
-                    paid_date: new Date()
+                    paid_at: new Date()
                 }
             })
         })
@@ -779,9 +779,9 @@ export async function deleteFine(id: number, path: string) {
     try {
 
         await prisma.$transaction(async (transaction) => {
-            await transaction.fines.delete({
+            await transaction.payments.delete({
                 where: {
-                    fine_id: id
+                    pay_id: id
                 }
             })
         })
@@ -800,10 +800,10 @@ export async function createCheckoutSession(data: FormData) {
     const session = await auth()
     if (!session) throw new Error("you must be logged in")
 
-    const fine_id = +data.get('fine_id')!   
-    const fine = await prisma.fines.findUnique({
+    const pay_id = +data.get('pay_id')!   
+    const fine = await prisma.payments.findUnique({
         where: {
-            fine_id: fine_id
+            pay_id: pay_id
         },
         include: {
             borrowings: {
@@ -820,7 +820,7 @@ export async function createCheckoutSession(data: FormData) {
         mode: 'payment',
         submit_type: 'pay',
         metadata: {
-            fine_id: fine_id
+            pay_id: pay_id
         },
         line_items: [
             {
@@ -1242,4 +1242,111 @@ export async function saveReadingProgress(
     console.error('Error saving reading progress:', error);
     return { error: 'Failed to save reading progress due to a server error.' };
   }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//              Request
+////////////////////////////////////////////////////////////////////////////////
+
+// Kiểu dữ liệu khi tạo yêu cầu thay đổi sách (admin hoặc user gửi request)
+type BookRequestInput = Omit<
+  Prisma.book_requestsCreateInput,
+  "id" | "status" | "requested_at" | "processed_at"
+>
+
+/**
+ * Dùng khi admin muốn tạo request thay mặt ai đó (hiếm khi, chủ yếu là user sẽ gửi)
+ */
+export async function requestBookChange(input: BookRequestInput) {
+  const session = await auth()
+  if (!session) throw new Error("Unauthorized")
+
+  await prisma.book_requests.create({
+    data: {
+      ...input,
+      author_id: session.user.id,
+    },
+  })
+}
+
+/**
+ * Admin phê duyệt yêu cầu thay đổi sách
+ * - id: id của bảng book_requests
+ * - path: đường dẫn cần revalidate
+ */
+export async function approveBookRequest(id: number, path: string) {
+  const req = await prisma.book_requests.findUnique({ where: { request_id: id } })
+  if (!req) throw new Error("Request not found")
+
+  await prisma.$transaction(async (tx) => {
+    const { action, book_id, details } = req
+
+    const parsedDetails = JSON.parse(details ?? "{}")
+
+    if (action === "add" || action === "create") {
+      // Tạo sách mới
+      await tx.books.create({
+        data: {
+            name: parsedDetails.name,
+            isbn: parsedDetails.isbn,
+            author_id: parsedDetails.author_id, // đảm bảo có giá trị hợp lệ
+            file_path: parsedDetails.file_path,
+            price: parsedDetails.price,
+            published_date: parsedDetails.published_date,
+            description: parsedDetails.description,
+            cover_image: parsedDetails.cover_image,
+            state: false,
+            totalPages: parsedDetails.totalPages,
+        },
+      })
+      // Sau đó nếu muốn xử lý categories (qua bảng book_category_links), có thể thêm đoạn riêng
+    } else if (action === "update") {
+      if (!book_id) throw new Error("Missing book_id for update")
+      await tx.books.update({
+        where: { book_id },
+        data: {
+          name: parsedDetails.name,
+          isbn: parsedDetails.isbn,
+          author_id: parsedDetails.author_id,
+          file_path: parsedDetails.file_path ?? null,
+          price: parsedDetails.price,
+          published_date: parsedDetails.published_date,
+          description: parsedDetails.description ?? null,
+          cover_image: parsedDetails.cover_image ?? null,
+          state: parsedDetails.state ?? false,
+          totalPages: parsedDetails.totalPages ?? null,
+        },
+      })
+    } else if (action === "delete") {
+      if (!book_id) throw new Error("Missing book_id for delete")
+      await tx.books.delete({
+        where: { book_id },
+      })
+    } else {
+      throw new Error(`Unknown request action: ${action}`)
+    }
+
+    // Cập nhật trạng thái yêu cầu thành "approved"
+    await tx.book_requests.update({
+      where: { request_id: id },
+      data: {
+        status: "approved",
+        // processed_at: new Date(), // Nếu cần, bạn có thể thêm cột processed_at vào schema
+      },
+    })
+  })
+
+  revalidatePath(path)
+}
+
+
+export async function rejectBookRequest(id: number) {
+  await prisma.book_requests.update({
+    where: { request_id: id },
+    data: {
+      status: "rejected",
+      // processed_at: new Date(),
+    },
+  })
 }

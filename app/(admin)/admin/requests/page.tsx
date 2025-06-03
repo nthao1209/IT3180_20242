@@ -1,27 +1,35 @@
-import RequestTable from './requests-table'
-import { Request } from './columns'
-import { prisma } from '@/lib/prisma'
+// app/(admin)/admin/requests/page.tsx
 
-// async function getBookRequests(): Promise<{ data: Request[], total: number }> {
-//   // Gọi API hoặc truy vấn từ DB (mock dưới đây)
-//   const res = await fetch('http://localhost:3000/api/book-requests', {
-//     cache: 'no-store',
-//   })
+import RequestTable from "./requests-table"
+import { Request } from "./columns"
+import { prisma } from "@/lib/prisma"
 
-
-async function getBookRequests(): Promise<{ data: Request[], total: number }> {
-  const dbResults = await prisma.bookRequest.findMany({
-    orderBy: { requested_at: 'desc' }
+// Lấy danh sách các book_requests từ Prisma, rồi map về kiểu Request để truyền vào RequestTable
+async function getBookRequests(): Promise<{ data: Request[]; total: number }> {
+  const dbResults = await prisma.book_requests.findMany({
+    orderBy: { created_at: "desc" },
+    include: {
+      users: {
+        select: { name: true }, // Giả sử bạn có trường `name` trong bảng users
+      },
+    },
   })
 
-  const requests: Request[] = dbResults.map(req => ({
-    id: req.id,
-    book_title: req.book_title,
-    author_name: req.author ?? 'Không rõ',
-    type: (req.type === 'add' ? 'create' : req.type) as "create" | "update" | "delete",
-    status: req.status as "pending" | "approved" | "rejected",
-    created_at: req.requested_at.toISOString(),
-  }))
+  const requests: Request[] = dbResults.map((req) => {
+    // Nếu details là null hoặc không parse được, để rỗng {}
+    const parsedDetails = req.details ? JSON.parse(req.details) : {}
+    return {
+      id: req.request_id,
+      book_title: parsedDetails.name || "—", // Giả sử bạn lưu tên sách dưới key `name`
+      author_name: req.users?.name || "Không rõ",
+      type: (req.action === "add" ? "create" : req.action) as
+        | "create"
+        | "update"
+        | "delete",
+      status: req.status as "pending" | "approved" | "rejected",
+      created_at: req.created_at.toISOString(),
+    }
+  })
 
   return {
     data: requests,
@@ -29,14 +37,13 @@ async function getBookRequests(): Promise<{ data: Request[], total: number }> {
   }
 }
 
-
 export default async function Page() {
-  const requests = await getBookRequests()
+  const { data, total } = await getBookRequests()
 
   return (
-    <div className='p-4 space-y-4'>
-      <h1 className='text-2xl font-bold'>Requests</h1>
-      <RequestTable data={requests} />
+    <div className="p-4 space-y-4">
+      <h1 className="text-2xl font-bold">Requests ({total})</h1>
+      <RequestTable data={{ data, total }} />
     </div>
   )
 }

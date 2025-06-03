@@ -13,13 +13,13 @@ type Photo = {
 export type Book = {
     book_id: number,
     name: string,
-    no_of_copies: number,
+    // no_of_copies: number,
     isbn: string,
-    is_active: boolean | number,
+    // is_active: boolean | number,
     book_category_links?: { category_id: number }[],
     book_photos?: Photo[],
-    publish_year: number,
-    author: string
+    published_date: number
+    // author: string
 }
 
 export const columns: ColumnDef<Book>[] = [
