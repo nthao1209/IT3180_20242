@@ -18,7 +18,7 @@ async function OnHold() {
       books: {
         select: {
           name: true,
-          author: true,
+          author_id: true,
           isbn: true,
           book_photos: {
             select: { url: true }

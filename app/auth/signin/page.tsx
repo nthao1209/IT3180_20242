@@ -53,6 +53,7 @@ async function SiginPage({
 
   return (
     <form action={handleSignIn} className='space-y-2'>
+      <BackButton/>
       {params.message && (
         <p className='border border-blue-300 rounded-md p-2 bg-blue-100'>
           {params.message}
@@ -71,8 +72,6 @@ async function SiginPage({
       <p className="text-sm text-center">
         Bạn chưa có tài khoản? <a href="/register" className="text-blue-600 underline">Đăng ký ngay</a>
       </p>
-
-      <BackButton />
     </form>
   )
 }

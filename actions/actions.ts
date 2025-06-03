@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
 import { revalidatePath } from "next/cache"
 import bcrypt from 'bcryptjs'
 import { auth, signIn, signOut } from "@/auth"
-import { addDays, addMonths, differenceInCalendarDays } from "date-fns"
+// import { addDays, addMonths, differenceInCalendarDays } from "date-fns"
 import { z } from "zod"
 import { stripe } from "@/lib/stripe"
 import { formatAmountForStripe } from "@/lib/utils"
@@ -31,115 +31,139 @@ import { Gender } from '@prisma/client';
 //       throw new Error("Unauthorized");
 //     }
 //   }
-  
-export async function requestAddBook(formData: FormData) {
-  const name = formData.get('name') as string;
-  const isbn = formData.get('isbn') as string;
-  const file_path = formData.get('file_path') as string;
-  const price = parseFloat(formData.get('price') as string);
-  const published_date = new Date(formData.get('published_date') as string).getFullYear();
-  const path = formData.get('path') as string;
-  const category = [1]; // Default category for now
 
-  try {
-    await prisma.book_requests.create({
-      data: {
-        author_id: 1, // TODO: Get from session
-        action: "add",
-        details: JSON.stringify({
-          name,
-          isbn,
-          category,
-          file_path,
-          price,
-          published_date,
-        }),
-        status: "pending",
-      },
-    });
-    revalidatePath(path);
-    return { message: "Add book request submitted" };
-  } catch (error) {
-    throw error;
-  }
-}
+export async function requestAddBook({
+    id,
+    name,
+    isbn,
+    category,
+    path,
+    published_date,
+    price,
+    file_path
+}: {
+    id: number,
+    name: string
+    isbn: string
+    category: number[]
+    path: string,
+    photos: string[],
+    published_date: number,
+    price: number,
+    file_path: string
+}) {
 
-export async function requestUpdateBook(formData: FormData) {
-  const id = parseInt(formData.get('id') as string);
-  const name = formData.get('name') as string;
-  const isbn = formData.get('isbn') as string;
-  const file_path = formData.get('file_path') as string;
-  const price = parseFloat(formData.get('price') as string);
-  const published_date = new Date(formData.get('published_date') as string).getFullYear();
-  const path = formData.get('path') as string;
-  const category = [1]; // Default category for now
-
-  try {
-    await prisma.book_requests.create({
-      data: {
-        book_id: id,
-        author_id: 1, // TODO: Get from session
-        action: "update",
-        details: JSON.stringify({
-          name: name,
-          isbn: isbn,
-          category: category,
-          file_path: file_path,
-          price: price,
-          published_date: published_date,
-        }),
-        status: "pending",
-      },
-    });
-    revalidatePath(path);
-    return { message: "Update book request submitted" };
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function requestDeleteBook(formData: FormData) {
-  const book_id = parseInt(formData.get('id') as string);
-  const path = formData.get('path') as string;
-
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not authenticated");
-  }
-
-  const existingRequest = await prisma.book_requests.findFirst({
-    where: {
-      book_id,
-      action: "delete",
-      status: "pending",
-    },
-  });
-
-  if (existingRequest) {
-    throw new Error("A delete request is already pending for this book");
-  }
-
-  await prisma.book_requests.create({
-    data: {
-      book_id,
-      author_id: parseInt(session.user.id),
-      action: "delete",
-      details: "{}",
-      status: "pending",
-    },
-  });
-
-  await prisma.books.update({
-    where: {
-      book_id: book_id
-    },
-    data: {
-      state: false
+    try {
+        await prisma.book_requests.create({
+            data: {
+                book_id: id,
+                // author_id: (await auth())!.user.user_id,
+                author_id: 1,
+                action: "add",
+                details: JSON.stringify({
+                    name,
+                    isbn,
+                    category,
+                    file_path,
+                    price,
+                    published_date,
+                }),
+                status: "pending",
+            },
+        });
+        revalidatePath(path);
+        return { message: "Update book request submitted" };
+    } catch (error) {
+        throw error
     }
-  });
 
-  revalidatePath(path);
-  return { message: "Delete book request submitted" };
+
+
+}
+
+export async function requestUpdateBook({
+    id,
+    name,
+    isbn,
+    category,
+    path,
+    published_date,
+    price,
+    file_path
+}: {
+    id: number,
+    name: string
+    isbn: string
+    category: number[]
+    path: string,
+    photos: string[],
+    published_date: number,
+    price: number,
+    file_path: string
+}) {
+    try {
+        await prisma.book_requests.create({
+            data: {
+                book_id: id,
+                // author_id: (await auth())!.user.user_id,
+                author_id: 1,
+                action: "update",
+                details: JSON.stringify({
+                    name,
+                    isbn,
+                    category,
+                    file_path,
+                    price,
+                    published_date,
+                }),
+                status: "pending",
+            },
+        });
+        revalidatePath(path);
+        return { message: "Update book request submitted" };
+    } catch (error) {
+        throw error
+    }
+
+
+}
+
+export async function requestDeleteBook(book_id: number, path: string) {
+    const session = await auth();
+
+    const existingRequest = await prisma.book_requests.findFirst({
+        where: {
+            book_id,
+            action: "delete",
+            status: "pending",
+        },
+    });
+
+    if (existingRequest) {
+        throw new Error("A delete request is already pending for this book");
+    }
+
+    await prisma.book_requests.create({
+        data: {
+            book_id,
+            // author_id: session.user.user_id,
+            author_id: 1,
+            action: "delete",
+            details: "{}",
+            status: "pending",
+        },
+    });
+    await prisma.books.update({
+        where: {
+            book_id: book_id
+        },
+        data: {
+            state: false
+        }
+    })
+
+    revalidatePath(path);
+    return { message: "Delete book request submitted" };
 }
 ////////////////////////////////////////////////////////////////////////////////
 //              Book
@@ -167,7 +191,7 @@ export async function addBook({
     file_path: string
 }) {
     // Validate required fields
-    if (!name || !isbn ) {
+    if (!name || !isbn) {
         throw new Error('Name, ISBN and author are required fields')
     }
 
@@ -181,13 +205,13 @@ export async function addBook({
 
     const existingBook = await prisma.books.findFirst({ where: { isbn } });
     const existingRequest = await prisma.book_requests.findFirst({
-         where: { details: { contains: `"isbn":"${isbn}"` }, status: "pending" },
+        where: { details: { contains: `"isbn":"${isbn}"` }, status: "pending" },
     });
     if (existingBook || existingRequest) {
         throw new Error("ISBN already exists");
     }
 
- 
+
     try {
         await prisma.$transaction(async t => {
             const book = await t.books.create({
@@ -220,7 +244,7 @@ export async function addBook({
             }
             revalidatePath(path)
         })
-    } catch(error) {
+    } catch (error) {
         console.error('Error adding book:', error)
         throw error
     }
@@ -248,7 +272,7 @@ export async function updateBook({
 }) {
 
     try {
-      
+
         await prisma.$transaction(async t => {
 
             const book = await t.books.update({
@@ -281,15 +305,15 @@ export async function updateBook({
 
             revalidatePath(path)
         })
-        
-    } catch(error) {
+
+    } catch (error) {
         throw error
     }
 }
 
 export async function deleteBook(book_id: number, path: string) {
 
-    await prisma.$transaction(async t => 
+    await prisma.$transaction(async t =>
 
         await t.books.delete({
             where: {
@@ -303,7 +327,7 @@ export async function deleteBook(book_id: number, path: string) {
 
 export async function placeHold(book_id: number, path: string) {
 //     const session = await auth()
-    
+
 //     if (!session) {
 //         throw new Error("You must be logged in")
 //     }
@@ -354,7 +378,7 @@ export async function addCategory(name: string, path: string) {
         revalidatePath(path)
         return category
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
@@ -377,7 +401,7 @@ export async function updateCategory(id: number, name: string, path: string) {
 
         revalidatePath(path)
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
@@ -396,7 +420,7 @@ export async function deleteCategory(id: number, path: string) {
 
         revalidatePath(path)
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
@@ -407,20 +431,20 @@ export async function getCategories(offset: number, limit: number) {
 
         let categories
         let total
-        
+
         if (limit === -1) {
             categories = await prisma.book_categories.findMany()
             total = categories.length
         } else {
             [categories, total] = await prisma.$transaction([
-                prisma.book_categories.findMany({ skip: offset, take: limit}),
+                prisma.book_categories.findMany({ skip: offset, take: limit }),
                 prisma.book_categories.count()
             ])
         }
 
-        return { data: categories, total: total}
+        return { data: categories, total: total }
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
@@ -429,7 +453,7 @@ export async function getCategories(offset: number, limit: number) {
 ////////////////////////////////////////////////////////////////////////////////
 //              Users
 ////////////////////////////////////////////////////////////////////////////////
-export async function addUser(username:string,name: string, email: string,date_of_birth:string,gender:string, role:string,path:string) {
+export async function addUser(username: string, name: string, email: string, date_of_birth: string, gender: string, role: string, path: string) {
 
     try {
 
@@ -439,11 +463,11 @@ export async function addUser(username:string,name: string, email: string,date_o
         const category = await prisma.$transaction([
             prisma.users.create({
                 data: {
-                    username:username,
+                    username: username,
                     name: name,
                     email: email,
-                    date_of_birth : date_of_birth,
-                    gender:genderEnum,
+                    date_of_birth: date_of_birth,
+                    gender: genderEnum,
                     role: role,
                     password: role === 'staff' ? hashPassword : '',
                 }
@@ -453,18 +477,18 @@ export async function addUser(username:string,name: string, email: string,date_o
         revalidatePath(path)
         return category
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
 
-export async function updateUser(user_id: number,username:string, name: string, email: string,date_of_birth:string, gender:string, role: string, path: string) {
-    
+export async function updateUser(user_id: number, username: string, name: string, email: string, date_of_birth: string, gender: string, role: string, path: string) {
+
     const dobDate = new Date(date_of_birth);
 
     if (isNaN(dobDate.getTime())) {
         throw new Error("Ngày sinh không hợp lệ");
-    } 
+    }
     const genderEnum = Gender[gender as keyof typeof Gender];
 
 
@@ -480,10 +504,10 @@ export async function updateUser(user_id: number,username:string, name: string, 
                     user_id: user_id
                 },
                 data: {
-                    username:username,
+                    username: username,
                     name: name,
                     email: email,
-                    date_of_birth:dobDate,
+                    date_of_birth: dobDate,
                     gender: genderEnum,
                     role: role,
                 }
@@ -526,109 +550,108 @@ const passwordFormSchema = z.object({
 })
 
 
-export async function updateProfile(state: State | undefined, formData: FormData):Promise<State> {
-  const session = await auth();
+export async function updateProfile(state: State | undefined, formData: FormData): Promise<State> {
+    const session = await auth();
 
-  if (!session) {
-    await signIn();
-    return { message: 'Vui lòng đăng nhập' };
-  }
+    if (!session) {
+        await signIn();
+        return { message: 'Vui lòng đăng nhập' };
+    }
 
-  console.log('session:', session);
-  const user = await prisma.users.findUnique({
-    where: {
-        email: session.user.email ?? undefined
+    console.log('session:', session);
+    const user = await prisma.users.findUnique({
+        where: {
+            email: session.user.email ?? undefined
         },
-  });
+    });
 
-  if (!user) {
-    return { message: 'Người dùng không hợp lệ' };
-  }
-
-  // Lấy các trường cá nhân
-  const username = formData.get('username') as string | null;
-  const name = formData.get('name') as string | null;
-  const email = formData.get('email') as string | null;
-  const date_of_birth_str = formData.get('date_of_birth') as string | null;
-  const gender_str = formData.get('gender') as string | null;
-  const role = formData.get('role') as string | null;
-
-  // Xử lý ngày sinh
-  let date_of_birth: Date | undefined = undefined;
-  if (date_of_birth_str) {
-    const d = new Date(date_of_birth_str);
-    if (!isNaN(d.getTime())) {
-      date_of_birth = d;
-    } else {
-      return { message: 'Ngày sinh không hợp lệ' };
-    }
-  }
-
-  // Xử lý giới tính
-  let gender: Gender | undefined = undefined;
-  if (gender_str) {
-    const g = Gender[gender_str as keyof typeof Gender];
-    if (g) {
-      gender = g;
-    } else {
-      return { message: 'Giới tính không hợp lệ' };
-    }
-  }
-
-  // Lấy mật khẩu mới, mật khẩu cũ và xác nhận mật khẩu
-  const new_password = formData.get('new_password') as string | null;
-  const old_password = formData.get('old_password') as string | null;
-  const confirm_password = formData.get('confirm_password') as string | null;
-
-  // Chuẩn bị object cập nhật
-  const updateData: any = {};
-
-  if (username) updateData.username = username;
-  if (name) updateData.name = name;
-  if (email) updateData.email = email;
-  if (date_of_birth) updateData.date_of_birth = date_of_birth;
-  if (gender) updateData.gender = gender;
-  if (role) updateData.role = role;
-
-  // Nếu có thay đổi mật khẩu
-  if (new_password) {
-    if (!old_password) {
-      return { message: 'Bạn phải nhập mật khẩu cũ để đổi mật khẩu mới' };
+    if (!user) {
+        return { message: 'Người dùng không hợp lệ' };
     }
 
-    if (!confirm_password) {
-      return { message: 'Vui lòng nhập lại mật khẩu mới để xác nhận' };
+    // Lấy các trường cá nhân
+    const username = formData.get('username') as string | null;
+    const name = formData.get('name') as string | null;
+    const email = formData.get('email') as string | null;
+    const date_of_birth_str = formData.get('date_of_birth') as string | null;
+    const gender_str = formData.get('gender') as string | null;
+    const role = formData.get('role') as string | null;
+
+    // Xử lý ngày sinh
+    let date_of_birth: Date | undefined = undefined;
+    if (date_of_birth_str) {
+        const d = new Date(date_of_birth_str);
+        if (!isNaN(d.getTime())) {
+            date_of_birth = d;
+        } else {
+            return { message: 'Ngày sinh không hợp lệ' };
+        }
     }
 
-    if (new_password !== confirm_password) {
-      return { message: 'Mật khẩu mới và mật khẩu xác nhận không khớp' };
+    // Xử lý giới tính
+    let gender: Gender | undefined = undefined;
+    if (gender_str) {
+        const g = Gender[gender_str as keyof typeof Gender];
+        if (g) {
+            gender = g;
+        } else {
+            return { message: 'Giới tính không hợp lệ' };
+        }
     }
 
-    const passwordValidate = passwordFormSchema.safeParse({ new_password });
-    if (!passwordValidate.success) {
-      return { message: 'Định dạng mật khẩu mới không hợp lệ' };
-    }
+    // Lấy mật khẩu mới, mật khẩu cũ và xác nhận mật khẩu
+    const new_password = formData.get('new_password') as string | null;
+    const old_password = formData.get('old_password') as string | null;
+    const confirm_password = formData.get('confirm_password') as string | null;
 
-    const password_match = await bcrypt.compare(old_password, user.password);
-    if (!password_match) {
-      return { message: 'Mật khẩu cũ không đúng' };
-    }
+    // Chuẩn bị object cập nhật
+    const updateData: any = {};
 
-    const new_hash_password = bcrypt.hashSync(new_password, 10);
-    updateData.password = new_hash_password;
-  }
+    if (username) updateData.username = username;
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (date_of_birth) updateData.date_of_birth = date_of_birth;
+    if (gender) updateData.gender = gender;
+    if (role) updateData.role = role;
+
+    // Nếu có thay đổi mật khẩu
+    if (new_password) {
+        if (!old_password) {
+            return { message: 'Bạn phải nhập mật khẩu cũ để đổi mật khẩu mới' };
+        }
+
+        if (!confirm_password) {
+            return { message: 'Vui lòng nhập lại mật khẩu mới để xác nhận' };
+        }
+
+        if (new_password !== confirm_password) {
+            return { message: 'Mật khẩu mới và mật khẩu xác nhận không khớp' };
+        }
+
+        const passwordValidate = passwordFormSchema.safeParse({ new_password });
+        if (!passwordValidate.success) {
+            return { message: 'Định dạng mật khẩu mới không hợp lệ' };
+        }
+
+        const password_match = await bcrypt.compare(old_password, user.password);
+        if (!password_match) {
+            return { message: 'Mật khẩu cũ không đúng' };
+        }
+
+        const new_hash_password = bcrypt.hashSync(new_password, 10);
+        updateData.password = new_hash_password;
+    }
 
     try {
         await prisma.users.update({
-        where: { email: session.user.email ?? undefined },
-        data: updateData,
+            where: { email: session.user.email ?? undefined },
+            data: updateData,
         });
-        
+
         await signOut({
-                redirectTo: `/auth/signin?callbackUrl=${encodeURIComponent('/admin')}&message=${encodeURIComponent('Mật khẩu đã được cập nhật, vui lòng đăng nhập lại.')}`,
-            });
-        
-        return { message: 'Profile updated successfully' };
+            redirectTo: `/auth/signin?callbackUrl=${encodeURIComponent('/admin')}&message=${encodeURIComponent('Mật khẩu đã được cập nhật, vui lòng đăng nhập lại.')}`,
+        });
+
     } catch (error) {
         console.error(error);
         return { message: 'Lỗi cơ sở dữ liệu: Cập nhật thông tin thất bại.' };
@@ -703,7 +726,7 @@ export async function updateActivity({ activity_id, title, description, activity
 
         revalidatePath(path)
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
@@ -722,64 +745,82 @@ export async function deleteActivity(id: number, path: string) {
 
         revalidatePath(path)
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
 ////////////////////////////////////////////////////////////////////////////////
 //              Fines
 ////////////////////////////////////////////////////////////////////////////////
-//export async function markAsPaid(id: number, path: string) {
-//    try {
+export async function markAsPaid(id: number, path: string) {
+    try {
 
- //       await prisma.$transaction(async (transaction) => {
-           // await transaction.fines.update({
-           //     where: {
-           //         fine_id: id
-           //     }, 
-//                data: {
-//                    paid_date: new Date()
-//                }
-//            })
-//        })
+        await prisma.$transaction(async (transaction) => {
+            await transaction.payments.update({
+                where: {
+                    pay_id: id
+                },
+                data: {
+                    paid_at: new Date()
+                }
+            })
+        })
 
-//        revalidatePath(path)
+        revalidatePath(path)
 
-//        return { message: "Fine paid" }
+        return { message: "Fine paid" }
 
-//    } catch (error) {
-//        throw error
-//    }
-//}
+    } catch (error) {
+        throw error
+    }
+}
 
+export async function deleteFine(id: number, path: string) {
+    try {
 
+        await prisma.$transaction(async (transaction) => {
+            await transaction.payments.delete({
+                where: {
+                    pay_id: id
+                }
+            })
+        })
+
+        revalidatePath(path)
+
+        return { message: "Fine deleted" }
+
+    } catch (error) {
+        throw error
+    }
+}
 
 export async function createCheckoutSession(data: FormData) {
 
     const session = await auth()
     if (!session) throw new Error("you must be logged in")
 
-   // const fine_id = +data.get('fine_id')!   
-   // const fine = await prisma.fines.findUnique({
-   //     where: {
-   //         fine_id: fine_id
-   //     },
-   //     include: {
-   //         borrowings: {
-   //             include: {
-   //                 books: {
-   //                     select: { name: true }
-   //                 }
-   //             }
-   //         }
-   //     }
-   // })
+    const pay_id = +data.get('pay_id')!
+    const fine = await prisma.payments.findUnique({
+        where: {
+            pay_id: pay_id
+        },
+        include: {
+            borrowings: {
+                include: {
+                    books: {
+                        select: { name: true }
+                    }
+                }
+            }
+        }
+    })
 
     const checkoutSession = await stripe.checkout.sessions.create({
         mode: 'payment',
         submit_type: 'pay',
         metadata: {
-           // fine_id: fine_id
+            pay_id: pay_id
         },
         line_items: [
             {
@@ -787,9 +828,9 @@ export async function createCheckoutSession(data: FormData) {
                 price_data: {
                     currency: 'cad',
                     product_data: {
-                        name: 'Book Purchase',
+                        name: `Late return fine for ${fine?.borrowings.books.name}`
                     },
-                  //  unit_amount: formatAmountForStripe((fine?.fine_amount as unknown) as number, 'CAD')
+                    unit_amount: formatAmountForStripe((fine?.fine_amount as unknown) as number, 'CAD')
                 }
             }
         ],
@@ -807,7 +848,7 @@ export async function addPhoto(table: string, entity_id: number, url: string, pa
 
     try {
 
-        const newPhoto = await prisma.$transaction( async t => {
+        const newPhoto = await prisma.$transaction(async t => {
 
             if (table === 'book') {
                 return await t.book_photos.create({
@@ -827,9 +868,9 @@ export async function addPhoto(table: string, entity_id: number, url: string, pa
         })
 
         revalidatePath(path)
-        return {photo_id: newPhoto?.photo_id as number, url: newPhoto?.url as string}
+        return { photo_id: newPhoto?.photo_id as number, url: newPhoto?.url as string }
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
@@ -838,7 +879,7 @@ export async function deletePhoto(table: string, id: number, path: string) {
 
     try {
 
-        const result = await prisma.$transaction( async t => {
+        const result = await prisma.$transaction(async t => {
 
             if (table === 'book') {
                 await t.book_photos.delete({
@@ -858,7 +899,7 @@ export async function deletePhoto(table: string, id: number, path: string) {
         revalidatePath(path)
         return result
 
-    } catch(error) {
+    } catch (error) {
         throw error
     }
 }
@@ -880,7 +921,6 @@ export async function addRating(book_id: number, prevState: State, formData: For
                 book_id: book_id,
                 user_id: Number(session?.user.id),
                 rating: +formData.get('rating')!,
-                //review: formData.get('comment')?.toString()
             }
         })
     ])
@@ -893,7 +933,7 @@ export async function addRating(book_id: number, prevState: State, formData: For
 
 export type State = {
     message?: string | null
-    requireSignOut?: boolean 
+    requireSignOut?: boolean
 }
 
 
@@ -916,10 +956,10 @@ export type BookSearchResult = Omit<Prisma.booksGetPayload<{
 };
 
 export interface PaginatedBookSearchResult {
-  books: BookSearchResult[];
-  totalResults: number;
-  totalPages: number;
-  currentPage: number;
+    books: BookSearchResult[];
+    totalResults: number;
+    totalPages: number;
+    currentPage: number;
 }
 
 const SEARCH_ITEMS_PER_PAGE = 20; // Hoặc một giá trị bạn muốn
@@ -945,7 +985,7 @@ export async function searchBooks(
             users: { // 'users' là tên trường quan hệ trong model 'books'
                 name: {
                     contains: searchQuery,
-                    
+
                 }
             }
         };
@@ -1024,22 +1064,22 @@ export async function searchBooks(
 }
 
 export async function handleSearchBarSearch(formData: FormData) {
-  const search_by_value = formData.get('search_by') as string; // Giá trị từ Select (all, name, author, description)
-  const search_query = formData.get('search') as string;
+    const search_by_value = formData.get('search_by') as string; // Giá trị từ Select (all, name, author, description)
+    const search_query = formData.get('search') as string;
 
-  console.log('[Search Bar Action] Criteria (search_by):', search_by_value);
-  console.log('[Search Bar Action] Query (search):', search_query);
+    console.log('[Search Bar Action] Criteria (search_by):', search_by_value);
+    console.log('[Search Bar Action] Query (search):', search_query);
 
-  if (search_query && search_query.trim() !== '' && search_by_value) {
-    const params = new URLSearchParams();
-    params.set('q', search_query.trim());      // 'q' cho query (từ khóa tìm kiếm)
-    params.set('crit', search_by_value); // 'crit' cho criteria (tiêu chí tìm kiếm)
+    if (search_query && search_query.trim() !== '' && search_by_value) {
+        const params = new URLSearchParams();
+        params.set('q', search_query.trim());      // 'q' cho query (từ khóa tìm kiếm)
+        params.set('crit', search_by_value); // 'crit' cho criteria (tiêu chí tìm kiếm)
 
-    redirect(`/search?${params.toString()}`);
-  } else {
-    // Nếu không có query hoặc criteria, có thể redirect về trang search trống
-    redirect('/search'); 
-  }
+        redirect(`/search?${params.toString()}`);
+    } else {
+        // Nếu không có query hoặc criteria, có thể redirect về trang search trống
+        redirect('/search');
+    }
 }
 
 
@@ -1047,13 +1087,13 @@ export async function handleSearchBarSearch(formData: FormData) {
 //Reading
 ///////////////////////////////////////////////
 export interface ReadingSessionDataForClient {
-  session_id: string;
-  user_id: number; // Vẫn giữ user_id là number ở đây vì DB của bạn dùng Int
-  book_id: number;
-  last_location: string | null;
-  last_read_timestamp: Date;
-  book_file_path: string | null;
-  book_name?: string | null;
+    session_id: string;
+    user_id: number; // Vẫn giữ user_id là number ở đây vì DB của bạn dùng Int
+    book_id: number;
+    last_location: string | null;
+    last_read_timestamp: Date;
+    book_file_path: string | null;
+    book_name?: string | null;
 }
 
 // --- Server Actions cho ReaderController ---
@@ -1066,80 +1106,80 @@ export interface ReadingSessionDataForClient {
  */
 
 export async function loadBookForReading(bookId: number): Promise<{ data?: ReadingSessionDataForClient; error?: string }> {
-  const session = await auth(); // Hàm auth từ file auth.ts của dự án chung
+    const session = await auth(); // Hàm auth từ file auth.ts của dự án chung
 
-  // Kiểm tra session và session.user.id (là user_id dạng string)
-  if (!session?.user?.id) { // DÙNG session.user.id
-    console.log('[loadBookForReading] User not authenticated or session.user.id is missing.');
-    return { error: 'User not authenticated. Please sign in to read.' };
-  }
+    // Kiểm tra session và session.user.id (là user_id dạng string)
+    if (!session?.user?.id) { // DÙNG session.user.id
+        console.log('[loadBookForReading] User not authenticated or session.user.id is missing.');
+        return { error: 'User not authenticated. Please sign in to read.' };
+    }
     console.log('[loadBookForReading] session.user.id (string from session):', session.user.id);
-  // Chuyển đổi session.user.id (string) thành number
-  const userId = parseInt(session.user.id, 10); 
-  console.log('[loadBookForReading] userId (after parseInt):', userId);
-  if (isNaN(userId)) {
-    console.error('[loadBookForReading] Error: userId is NaN. session.user.id was:', session.user.id);
-    return { error: 'Invalid user session data.' };
-  }
-
-  try {
-    const book = await prisma.books.findUnique({
-      where: { book_id: bookId },
-      select: { 
-        name: true, 
-        file_path: true, 
-        state: true 
-      },
-    });
-
-    if (!book) {
-      return { error: 'Book not found.' };
+    // Chuyển đổi session.user.id (string) thành number
+    const userId = parseInt(session.user.id, 10);
+    console.log('[loadBookForReading] userId (after parseInt):', userId);
+    if (isNaN(userId)) {
+        console.error('[loadBookForReading] Error: userId is NaN. session.user.id was:', session.user.id);
+        return { error: 'Invalid user session data.' };
     }
 
-    if (!book.state) { 
-      return { error: 'You do not have permission to read this book or it is not available for reading online.' };
-    }
+    try {
+        const book = await prisma.books.findUnique({
+            where: { book_id: bookId },
+            select: {
+                name: true,
+                file_path: true,
+                state: true
+            },
+        });
 
-    if (!book.file_path) {
-      return { error: 'Book file (digital copy) is not available for reading.' };
-    }
-
-    let readingSession = await prisma.reading_sessions.findUnique({
-      where: { user_id_book_id: { user_id: userId, book_id: bookId } }, // userId đã là number
-    });
-
-    if (!readingSession) {
-        console.log(`[loadBookForReading] Creating new reading session for userId: ${userId}, bookId: ${bookId}`);
-        // Kiểm tra xem user có tồn tại không trước khi tạo session (tùy chọn, nhưng tốt cho debug)
-        const userExists = await prisma.users.findUnique({ where: { user_id: userId } });
-        if (!userExists) {
-            console.error(`[loadBookForReading] CRITICAL: User with ID ${userId} does not exist in DB. Cannot create reading session.`);
-            return { error: `User session is invalid or user does not exist (ID: ${userId}). Please sign out and sign in again.` };
+        if (!book) {
+            return { error: 'Book not found.' };
         }
-      readingSession = await prisma.reading_sessions.create({
-        data: {
-          user_id: userId, // userId đã là number
-          book_id: bookId,
-          last_location: null,
-        },
-      });
-    }
 
-    return {
-      data: {
-        session_id: readingSession.session_id,
-        user_id: readingSession.user_id, // Đây là user_id (number) từ DB
-        book_id: readingSession.book_id,
-        last_location: readingSession.last_location,
-        last_read_timestamp: readingSession.last_read_timestamp,
-        book_file_path: book.file_path,
-        book_name: book.name,
-      },
-    };
-  } catch (error) {
-    console.error('Error loading book for reading:', error);
-    return { error: 'Failed to load book for reading due to a server error.' };
-  }
+        if (!book.state) {
+            return { error: 'You do not have permission to read this book or it is not available for reading online.' };
+        }
+
+        if (!book.file_path) {
+            return { error: 'Book file (digital copy) is not available for reading.' };
+        }
+
+        let readingSession = await prisma.reading_sessions.findUnique({
+            where: { user_id_book_id: { user_id: userId, book_id: bookId } }, // userId đã là number
+        });
+
+        if (!readingSession) {
+            console.log(`[loadBookForReading] Creating new reading session for userId: ${userId}, bookId: ${bookId}`);
+            // Kiểm tra xem user có tồn tại không trước khi tạo session (tùy chọn, nhưng tốt cho debug)
+            const userExists = await prisma.users.findUnique({ where: { user_id: userId } });
+            if (!userExists) {
+                console.error(`[loadBookForReading] CRITICAL: User with ID ${userId} does not exist in DB. Cannot create reading session.`);
+                return { error: `User session is invalid or user does not exist (ID: ${userId}). Please sign out and sign in again.` };
+            }
+            readingSession = await prisma.reading_sessions.create({
+                data: {
+                    user_id: userId, // userId đã là number
+                    book_id: bookId,
+                    last_location: null,
+                },
+            });
+        }
+
+        return {
+            data: {
+                session_id: readingSession.session_id,
+                user_id: readingSession.user_id, // Đây là user_id (number) từ DB
+                book_id: readingSession.book_id,
+                last_location: readingSession.last_location,
+                last_read_timestamp: readingSession.last_read_timestamp,
+                book_file_path: book.file_path,
+                book_name: book.name,
+            },
+        };
+    } catch (error) {
+        console.error('Error loading book for reading:', error);
+        return { error: 'Failed to load book for reading due to a server error.' };
+    }
 }
 
 
@@ -1168,41 +1208,148 @@ export async function loadBookForReading(bookId: number): Promise<{ data?: Readi
 
 
 export async function saveReadingProgress(
-  bookId: number,
-  currentLocation: string
+    bookId: number,
+    currentLocation: string
 ): Promise<{ success?: string; error?: string }> {
-  const session = await auth(); // Hàm auth từ file auth.ts của dự án chung
+    const session = await auth(); // Hàm auth từ file auth.ts của dự án chung
 
-  // Kiểm tra session và session.user.id (là user_id dạng string)
-  if (!session?.user?.id) { // DÙNG session.user.id
-    return { error: 'User not authenticated. Cannot save progress.' };
-  }
+    // Kiểm tra session và session.user.id (là user_id dạng string)
+    if (!session?.user?.id) { // DÙNG session.user.id
+        return { error: 'User not authenticated. Cannot save progress.' };
+    }
 
-  // Chuyển đổi session.user.id (string) thành number
-  const userId = parseInt(session.user.id, 10);
-  if (isNaN(userId)) {
-    return { error: 'Invalid user session data.' };
-  }
+    // Chuyển đổi session.user.id (string) thành number
+    const userId = parseInt(session.user.id, 10);
+    if (isNaN(userId)) {
+        return { error: 'Invalid user session data.' };
+    }
 
-  if (!currentLocation || typeof currentLocation !== 'string') {
-    return { error: 'Invalid reading location (CFI) provided.' };
-  }
+    if (!currentLocation || typeof currentLocation !== 'string') {
+        return { error: 'Invalid reading location (CFI) provided.' };
+    }
 
-  try {
-    await prisma.reading_sessions.upsert({
-      where: { user_id_book_id: { user_id: userId, book_id: bookId } }, // userId đã là number
-      update: { last_location: currentLocation },
-      create: {
-        user_id: userId, // userId đã là number
-        book_id: bookId,
-        last_location: currentLocation,
-      },
-    });
-    return { success: 'Reading progress saved.' };
-  } catch (error) {
-    console.error('Error saving reading progress:', error);
-    return { error: 'Failed to save reading progress due to a server error.' };
-  }
+    try {
+        await prisma.reading_sessions.upsert({
+            where: { user_id_book_id: { user_id: userId, book_id: bookId } }, // userId đã là number
+            update: { last_location: currentLocation },
+            create: {
+                user_id: userId, // userId đã là number
+                book_id: bookId,
+                last_location: currentLocation,
+            },
+        });
+        return { success: 'Reading progress saved.' };
+    } catch (error) {
+        console.error('Error saving reading progress:', error);
+        return { error: 'Failed to save reading progress due to a server error.' };
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//              Request
+////////////////////////////////////////////////////////////////////////////////
+
+// Kiểu dữ liệu khi tạo yêu cầu thay đổi sách (admin hoặc user gửi request)
+type BookRequestInput = Omit<
+    Prisma.book_requestsCreateInput,
+    "id" | "status" | "requested_at" | "processed_at"
+>
+
+/**
+ * Dùng khi admin muốn tạo request thay mặt ai đó (hiếm khi, chủ yếu là user sẽ gửi)
+ */
+export async function requestBookChange(input: BookRequestInput) {
+    const session = await auth()
+    if (!session) throw new Error("Unauthorized")
+
+    await prisma.book_requests.create({
+        data: {
+            ...input,
+            author_id: session.user.id,
+        },
+    })
+}
+
+/**
+ * Admin phê duyệt yêu cầu thay đổi sách
+ * - id: id của bảng book_requests
+ * - path: đường dẫn cần revalidate
+ */
+export async function approveBookRequest(id: number, path: string) {
+    const req = await prisma.book_requests.findUnique({ where: { request_id: id } })
+    if (!req) throw new Error("Request not found")
+
+    await prisma.$transaction(async (tx) => {
+        const { action, book_id, details } = req
+
+        const parsedDetails = JSON.parse(details ?? "{}")
+
+        if (action === "add" || action === "create") {
+            // Tạo sách mới
+            await tx.books.create({
+                data: {
+                    name: parsedDetails.name,
+                    isbn: parsedDetails.isbn,
+                    author_id: parsedDetails.author_id, // đảm bảo có giá trị hợp lệ
+                    file_path: parsedDetails.file_path,
+                    price: parsedDetails.price,
+                    published_date: parsedDetails.published_date,
+                    description: parsedDetails.description,
+                    cover_image: parsedDetails.cover_image,
+                    state: false,
+                    totalPages: parsedDetails.totalPages,
+                },
+            })
+            // Sau đó nếu muốn xử lý categories (qua bảng book_category_links), có thể thêm đoạn riêng
+        } else if (action === "update") {
+            if (!book_id) throw new Error("Missing book_id for update")
+            await tx.books.update({
+                where: { book_id },
+                data: {
+                    name: parsedDetails.name,
+                    isbn: parsedDetails.isbn,
+                    author_id: parsedDetails.author_id,
+                    file_path: parsedDetails.file_path ?? null,
+                    price: parsedDetails.price,
+                    published_date: parsedDetails.published_date,
+                    description: parsedDetails.description ?? null,
+                    cover_image: parsedDetails.cover_image ?? null,
+                    state: parsedDetails.state ?? false,
+                    totalPages: parsedDetails.totalPages ?? null,
+                },
+            })
+        } else if (action === "delete") {
+            if (!book_id) throw new Error("Missing book_id for delete")
+            await tx.books.delete({
+                where: { book_id },
+            })
+        } else {
+            throw new Error(`Unknown request action: ${action}`)
+        }
+
+        // Cập nhật trạng thái yêu cầu thành "approved"
+        await tx.book_requests.update({
+            where: { request_id: id },
+            data: {
+                status: "approved",
+                // processed_at: new Date(), // Nếu cần, bạn có thể thêm cột processed_at vào schema
+            },
+        })
+    })
+
+    revalidatePath(path)
+}
+
+
+export async function rejectBookRequest(id: number) {
+    await prisma.book_requests.update({
+        where: { request_id: id },
+        data: {
+            status: "rejected",
+            // processed_at: new Date(),
+        },
+    })
 }
 
 export async function likeBook(bookId: number, path: string) {

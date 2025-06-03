@@ -172,55 +172,9 @@ export default async function HomePage() {
               <CarouselNext />
             </Carousel>
           </section>)
-        )}
-
-
-
-        {/* staff picks - kept logic mostly commented as in original */}
-        <div>
-          <h2 className="text-2xl font-bold pb-4 pl-4">Staff picks</h2>
-          <Carousel
-            opts={{
-              slidesToScroll: 'auto',
-              align: 'start'
-            }}
-            className="flex w-full"
-          >
-            <CarouselContent>
-              {/* Example if staff_picks were active:
-              {
-                staff_picks.map(sp => (
-                  <CarouselItem key={sp.book_id} className='basis-auto'>
-                    <Link href={`/book/${sp.book_id}`} className="group block">
-                      {sp.books.book_photos && sp.books.book_photos.length > 0 && sp.books.book_photos[0].url ? (
-                        <Image
-                          className={imageBaseClassName}
-                          src={sp.books.book_photos[0].url}
-                          width={150}
-                          height={200}
-                          alt={sp.books.name} />
-                      ) : (
-                        <ImagePlaceholder className={imageBaseClassName} />
-                      )}
-                      <p className="mt-2 text-sm font-medium truncate group-hover:underline">{sp.books.name}</p>
-                    </Link>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 pt-1">Picked by: {sp.users.name}</p>
-                  </CarouselItem>
-                ))
-              } 
-              */}
-              {/* Placeholder if no staff picks or data is not ready */}
-              <CarouselItem>
-                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                  No staff picks available at the moment.
-                </div>
-              </CarouselItem>
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
+        )}        
         </div>
-      </div>
     </>
   );
 }
+    

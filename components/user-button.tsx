@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import React from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { ChevronUp, User2 } from 'lucide-react'
+import { ChevronDown, User2 } from 'lucide-react'
 import Link from 'next/link'
 import SignInButton from './signin-button'
 import SignOutButton from './signout-button'
@@ -12,14 +12,15 @@ async function UserButton() {
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <SidebarProvider>
-                    <SidebarMenuButton>
-                        <User2 /><p className='capitalize'>{session?.user?.name?.split(' ')[0]}</p>
-                        <ChevronUp className='ml-auto'/>
-                    </SidebarMenuButton>
-                </SidebarProvider>
-            </DropdownMenuTrigger>
+           <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-2 px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors">
+            <User2 className="text-gray-600" />
+            <span className="capitalize font-medium text-gray-800">
+                {session?.user?.name?.split(' ')[0] || 'Guest'}
+            </span>
+            <ChevronDown className="text-gray-500" />
+            </button>
+        </DropdownMenuTrigger>
             <DropdownMenuContent side='top' className='w-[150px]'>
                 {
                     !session && 
@@ -31,7 +32,6 @@ async function UserButton() {
                         <DropdownMenuItem>
                             <SignInButton styles='pl-2'/>
                         </DropdownMenuItem>
-
                     </div>
                     
                 }
@@ -41,26 +41,10 @@ async function UserButton() {
                         <Link href={'/admin'} className='p-2'>Dashboard</Link>
                     </DropdownMenuItem>
                 }
-                {
-                    session?.user && session.user.role === 'member' && 
-                    <DropdownMenuItem>
-                        <Link href={'/my-account'} className='p-2'>My Account</Link>
-                    </DropdownMenuItem>
-                }  
-
-                {
-                    session?.user && session.user.role === 'author' && 
-                    <DropdownMenuItem>
-                        <Link href={'/author'} className='p-2'>Dashboard</Link>
-                    </DropdownMenuItem>
-                }       
-       
-                
-                
+                   
                 {
                     session?.user && 
-                    <div>
-                    
+                <div> 
                     <DropdownMenuItem>
                         <Link href='/profile' className='p-2'>Profile</Link>
                     </DropdownMenuItem>
@@ -68,7 +52,7 @@ async function UserButton() {
                     <DropdownMenuItem>
                         <SignOutButton styles='pl-2' />
                     </DropdownMenuItem>
-                    </div>
+                </div>
                 }
             </DropdownMenuContent>
         </DropdownMenu>
