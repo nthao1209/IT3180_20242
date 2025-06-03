@@ -30,10 +30,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+
 # env files (can opt-in for committing if needed)
 .env
 .env.local
 .env.*.local 
+
 
 google_drive.json
 
@@ -43,11 +45,3 @@ google_drive.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-<<<<<<< HEAD
-=======
-
-/prisma/migrations
-
-auth.ts
-middleware.ts
->>>>>>> origin/search-and-read

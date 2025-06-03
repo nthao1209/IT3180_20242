@@ -65,13 +65,13 @@ function ProfileForm({ user }: Props) {
   })
 
   useEffect(() => {
-  if (state.message?.includes('Cập nhật') && !state.requireSignOut) {
+  if (state?.message?.includes('Cập nhật') && !state?.requireSignOut) {
     form.reset()
     // Bắt reload lại trang để lấy session mới nhất từ server
     window.location.reload()
   }
 
-  if (state.requireSignOut) {
+  if (state?.requireSignOut) {
     window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent('/')}&message=${encodeURIComponent(state.message ?? '')}`
   }
 }, [state, form])
@@ -174,7 +174,7 @@ function ProfileForm({ user }: Props) {
 
         )} />
 
-        <p className="text-red-500 text-sm">{state.message}</p>
+        {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
         <Button type="submit" className="w-full"  >Cập nhật thông tin</Button>
       </form>
     </Form>

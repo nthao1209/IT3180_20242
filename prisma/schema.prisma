@@ -11,68 +11,70 @@ datasource db {
 
 enum Gender {
   Nam
-  Nu   @map("Nữ")
-  Khac @map("Khác")
+  Nữ
+  Khác
 }
 
 model users {
-  user_id          Int                @id @default(autoincrement())
-  username         String             @unique @db.VarChar(50)
-  email            String             @unique @db.VarChar(100)
-  password         String
-  name             String             @db.VarChar(100)
-  date_of_birth    DateTime           @db.Date
-  gender           Gender
-  role             String             @db.VarChar(30)
-  created_at       DateTime           @default(now()) @db.Timestamp(0)
-  book_requests    book_requests[]
-  author_books     books[]
-  comments         comments[]
-  liked_books      liked_books[]
-  payments         payments[]
-  ratings          ratings[]
+  user_id         Int       @id @default(autoincrement())
+  username   String    @unique @db.VarChar(50)
+  email      String    @unique @db.VarChar(100)
+  password   String    @db.Text
+  name  String   @db.VarChar(100)
+  date_of_birth  DateTime?  @db.Date 
+  gender    Gender?    
+  role       String    @db.VarChar(30)
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  ratings    ratings[]
+
+  comments   comments[]
+  replies      replies[]
+  payments   payments[]
+  user_books user_books[]
+  author_books books[]
+  liked_books liked_books[]
+  book_requests book_requests[]
   reading_sessions reading_sessions[]
-  replies          replies[]
-  reservations     reservations[]
-  user_books       user_books[]
+  reservations reservations[]
 }
 
 model books {
-  book_id             Int                   @id @default(autoincrement())
+  book_id           Int       @id @default(autoincrement())
   isbn                String                @db.VarChar(13)
-  name                String                @db.VarChar(200)
-  author_id           Int
-  description         String?
-  published_date      Int
-  cover_image         String?               @db.VarChar(255)
-  file_path           String?               @db.VarChar(500)
-  price               Decimal               @default(0.00) @db.Decimal(10, 2)
-  created_at          DateTime              @default(now())
-  state               Boolean               @default(false)
-  totalPages          Int?
+  name         String    @db.VarChar(200)
+  author_id     Int
+  users      users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "author_book")
+  description   String?   @db.Text
+  published_date Int 
+  cover_image   String?   @db.VarChar(255)
+  file_path     String?   @db.VarChar(500)
+  price         Decimal   @default(0.00) @db.Decimal(10, 2)
+  created_at    DateTime  @default(now())
+  state         Boolean    @default(false)
   book_category_links book_category_links[]
-  book_photos         book_photos[]
+  ratings       ratings[]
+  comments      comments[]
+  book_photos   book_photos[]
+  payments      payments[]
+  user_books    user_books[]
+  liked_books   liked_books[]
+  totalPages          Int?
   book_requests       book_requests[]
-  users               users                 @relation(fields: [author_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "author_book")
-  comments            comments[]
-  liked_books         liked_books[]
-  payments            payments[]
-  ratings             ratings[]
   reading_sessions    reading_sessions[]
-  reservations        reservations[]
-  user_books          user_books[]
+  reservations       reservations[]
 }
 
 model reading_sessions {
-  session_id          String   @id @default(cuid())
+  session_id          String   @id @default(cuid()) 
   user_id             Int
   book_id             Int
   last_location       String?
-  last_read_timestamp DateTime @updatedAt
-  books               books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade)
-  users               users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  last_read_timestamp DateTime @updatedAt 
 
-  @@unique([user_id, book_id])
+  users               users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  books               books    @relation(fields: [book_id], references: [book_id], onDelete: Cascade)
+
+  @@unique([user_id, book_id]) 
   @@index([user_id])
   @@index([book_id])
 }

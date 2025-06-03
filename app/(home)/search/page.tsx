@@ -1,4 +1,3 @@
-
 // app/(home)/search/page.tsx
 'use client';
 

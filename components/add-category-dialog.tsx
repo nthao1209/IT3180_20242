@@ -1,6 +1,18 @@
 import React, { useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
-import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle
+} from './ui/dialog'
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel
+} from './ui/form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -8,16 +20,9 @@ import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { addCategory, updateCategory } from '@/actions/actions'
 import { usePathname } from 'next/navigation'
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { toast } from 'sonner'
-=======
 import { useToast } from '@/hooks/use-toast'
->>>>>>> origin/author
-=======
-import { useToast } from '@/hooks/use-toast'
->>>>>>> origin/search-and-read
 import { Category } from '@/app/(admin)/admin/categories/columns'
+
 type Props = {
     open: boolean,
     setOpen: React.Dispatch<React.SetStateAction<boolean>>,
@@ -25,26 +30,19 @@ type Props = {
 }
 
 const formSchema = z.object({
-    id: z.number().default(-1),
+    id: z.number().default(-1).optional(),
     name: z.string().min(2, {
         message: 'Category must be entered'
     }).max(20)
 })
 
 function AddCategoryDialog({ setOpen, open, category }: Props) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
     const { toast } = useToast()
->>>>>>> origin/author
-=======
-    const { toast } = useToast()
->>>>>>> origin/search-and-read
     const path = usePathname()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: { name: '' }
+        defaultValues: { id: -1, name: '' }
     })
 
     useEffect(() => {
@@ -56,46 +54,20 @@ function AddCategoryDialog({ setOpen, open, category }: Props) {
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            let message =  'Category has been saved'
+            let message = 'Category has been saved'
             if (category) {
                 await updateCategory(category.category_id, values.name, path)
-                message = "category updated"
+                message = 'Category updated'
             } else {
                 await addCategory(values.name, path)
             }
-            
-<<<<<<< HEAD
-<<<<<<< HEAD
-            toast(  message)
-=======
-            toast({
-                description: message
-            })
->>>>>>> origin/author
-=======
-            toast({
-                description: message
-            })
->>>>>>> origin/search-and-read
+
+            toast({ description: message })
             form.reset()
-
-        } catch(error) {
+        } catch (error) {
             console.log(error)
-<<<<<<< HEAD
-<<<<<<< HEAD
-            toast('Failed to perform action')
-=======
-            toast({
-                description: 'Failed to perform action',
-            })
->>>>>>> origin/author
-=======
-            toast({
-                description: 'Failed to perform action',
-            })
->>>>>>> origin/search-and-read
+            toast({ description: 'Failed to perform action' })
         }
-
     }
 
     return (
@@ -105,21 +77,20 @@ function AddCategoryDialog({ setOpen, open, category }: Props) {
                     <DialogTitle>Add category</DialogTitle>
                     <DialogDescription></DialogDescription>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-1'>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-1">
                             <FormField
-                            control={form.control}
-                            name='name'
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Category</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder='category name' {...field} />
-                                    </FormControl>
-                                </FormItem>
-                            )}
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Category</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="category name" {...field} />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
                             />
-
-                            <Button type='submit'>Save</Button>
+                            <Button type="submit">Save</Button>
                         </form>
                     </Form>
                 </DialogHeader>
