@@ -37,7 +37,7 @@ export async function getPaginatedCatalogBooks(
         select: {
           book_id: true,
           name: true,
-          author: true,
+          author_id: true,
           book_photos: {
             select: { url: true },
             take: 1,

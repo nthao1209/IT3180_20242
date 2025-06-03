@@ -31,6 +31,7 @@ async function UserButton() {
                         <DropdownMenuItem>
                             <SignInButton styles='pl-2'/>
                         </DropdownMenuItem>
+
                     </div>
                     
                 }
@@ -54,16 +55,20 @@ async function UserButton() {
                     </DropdownMenuItem>
                 }       
        
-                <DropdownMenuItem>
-                    <Link href='/profile' className='p-2'>Profile</Link>
-                </DropdownMenuItem>
-
+                
                 
                 {
                     session?.user && 
+                    <div>
+                    
+                    <DropdownMenuItem>
+                        <Link href='/profile' className='p-2'>Profile</Link>
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem>
                         <SignOutButton styles='pl-2' />
                     </DropdownMenuItem>
+                    </div>
                 }
             </DropdownMenuContent>
         </DropdownMenu>
