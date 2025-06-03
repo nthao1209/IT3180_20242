@@ -70,8 +70,6 @@ const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
 
-    // This is the internal state of the sidebar.
-    // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen)
     const open = openProp ?? _open
     const setOpen = React.useCallback(
@@ -83,13 +81,11 @@ const SidebarProvider = React.forwardRef<
           _setOpen(openState)
         }
 
-        // This sets the cookie to keep the sidebar state.
         document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
       },
       [setOpenProp, open]
     )
 
-    // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
       return isMobile
         ? setOpenMobile((open) => !open)
@@ -141,7 +137,7 @@ const SidebarProvider = React.forwardRef<
               } as React.CSSProperties
             }
             className={cn(
-              "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
+              "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-slate-100 dark:has-[[data-variant=inset]]:bg-slate-800", // Changed bg-sidebar
               className
             )}
             ref={ref}
@@ -181,7 +177,7 @@ const Sidebar = React.forwardRef<
       return (
         <div
           className={cn(
-            "flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground",
+            "flex h-full w-[--sidebar-width] flex-col bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200", // Changed bg-sidebar, text-sidebar-foreground
             className
           )}
           ref={ref}
@@ -199,7 +195,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-[--sidebar-width] bg-slate-100 p-0 text-slate-700 dark:bg-slate-800 dark:text-slate-200 [&>button]:hidden" // Changed bg-sidebar, text-sidebar-foreground
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -216,7 +212,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden md:block text-sidebar-foreground"
+        className="group peer hidden text-slate-700 dark:text-slate-200 md:block" // Changed text-sidebar-foreground
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -242,14 +238,22 @@ const Sidebar = React.forwardRef<
             // Adjust the padding for floating and inset variants.
             variant === "floating" || variant === "inset"
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
+              : cn(
+                  "group-data-[collapsible=icon]:w-[--sidebar-width-icon]",
+                  "border-slate-300 dark:border-slate-700", // Added border color
+                  "group-data-[side=left]:border-r",
+                  "group-data-[side=right]:border-l"
+                ),
             className
           )}
           {...props}
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+            className={cn(
+              "flex h-full w-full flex-col bg-slate-100 dark:bg-slate-800", // Changed bg-sidebar
+              "group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-slate-300 dark:group-data-[variant=floating]:border-slate-700 group-data-[variant=floating]:shadow" // Changed border-sidebar-border
+            )}
           >
             {children}
           </div>
@@ -301,10 +305,10 @@ const SidebarRail = React.forwardRef<
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
+        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-slate-300 dark:hover:after:bg-slate-700 group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex", // Changed hover:after:bg-sidebar-border
         "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",
         "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
-        "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar",
+        "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-slate-100 dark:group-data-[collapsible=offcanvas]:hover:bg-slate-800", // Changed hover:bg-sidebar
         "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
         "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
         className
@@ -342,7 +346,7 @@ const SidebarInput = React.forwardRef<
       ref={ref}
       data-sidebar="input"
       className={cn(
-        "h-8 w-full bg-background shadow-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+        "h-8 w-full bg-background shadow-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:focus-visible:ring-slate-500", // Changed ring-sidebar-ring
         className
       )}
       {...props}
@@ -389,7 +393,7 @@ const SidebarSeparator = React.forwardRef<
     <Separator
       ref={ref}
       data-sidebar="separator"
-      className={cn("mx-2 w-auto bg-sidebar-border", className)}
+      className={cn("mx-2 w-auto bg-slate-300 dark:bg-slate-700", className)} // Changed bg-sidebar-border
       {...props}
     />
   )
@@ -440,7 +444,7 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opa] ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        "duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-slate-700/70 dark:text-slate-200/70 outline-none ring-slate-400 dark:ring-slate-500 transition-[margin,opa] ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0", // Changed text-sidebar-foreground/70, ring-sidebar-ring
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
         className
       )}
@@ -461,7 +465,7 @@ const SidebarGroupAction = React.forwardRef<
       ref={ref}
       data-sidebar="group-action"
       className={cn(
-        "absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        "absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-slate-700 dark:text-slate-200 outline-none ring-slate-400 dark:ring-slate-500 transition-transform hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100 focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0", // Changed text-sidebar-foreground, ring-sidebar-ring, hover:bg-sidebar-accent, hover:text-sidebar-accent-foreground
         // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "group-data-[collapsible=icon]:hidden",
@@ -513,13 +517,14 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-slate-400 dark:ring-slate-500 transition-[width,height,padding] focus-visible:ring-2 active:bg-slate-200 dark:active:bg-slate-700 active:text-slate-800 dark:active:text-slate-100 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0", // Base changes: ring-sidebar-ring, active states
   {
     variants: {
       variant: {
-        default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+        default:
+          "hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100 data-[active=true]:bg-slate-200 dark:data-[active=true]:bg-slate-700 data-[active=true]:text-slate-800 dark:data-[active=true]:text-slate-100 data-[state=open]:hover:bg-slate-200 dark:data-[state=open]:hover:bg-slate-700 data-[state=open]:hover:text-slate-800 dark:data-[state=open]:hover:text-slate-100", // Changed all sidebar-accent, sidebar-accent-foreground
         outline:
-          "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
+          "border border-slate-300 dark:border-slate-700 bg-background hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100 hover:border-slate-400 dark:hover:border-slate-600 data-[active=true]:bg-slate-200 dark:data-[active=true]:bg-slate-700 data-[active=true]:text-slate-800 dark:data-[active=true]:text-slate-100 data-[state=open]:hover:bg-slate-200 dark:data-[state=open]:hover:bg-slate-700 data-[state=open]:hover:text-slate-800 dark:data-[state=open]:hover:text-slate-100", // Replaced shadow with border, changed all sidebar-accent etc.
       },
       size: {
         default: "h-8 text-sm",
@@ -607,7 +612,7 @@ const SidebarMenuAction = React.forwardRef<
       ref={ref}
       data-sidebar="menu-action"
       className={cn(
-        "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
+        "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-slate-700 dark:text-slate-200 outline-none ring-slate-400 dark:ring-slate-500 transition-transform hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100 focus-visible:ring-2 peer-hover/menu-button:text-slate-800 dark:peer-hover/menu-button:text-slate-100 [&>svg]:size-4 [&>svg]:shrink-0", // Changed text-sidebar-foreground, ring-sidebar-ring, hover:bg-sidebar-accent, hover:text-sidebar-accent-foreground, peer-hover text
         // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "peer-data-[size=sm]/menu-button:top-1",
@@ -615,7 +620,7 @@ const SidebarMenuAction = React.forwardRef<
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
+          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-slate-800 dark:peer-data-[active=true]/menu-button:text-slate-100 md:opacity-0", // Changed peer-data-[active=true] text
         className
       )}
       {...props}
@@ -632,8 +637,8 @@ const SidebarMenuBadge = React.forwardRef<
     ref={ref}
     data-sidebar="menu-badge"
     className={cn(
-      "absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums text-sidebar-foreground select-none pointer-events-none",
-      "peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground",
+      "absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums text-slate-700 dark:text-slate-200 select-none pointer-events-none", // Changed text-sidebar-foreground
+      "peer-hover/menu-button:text-slate-800 dark:peer-hover/menu-button:text-slate-100 peer-data-[active=true]/menu-button:text-slate-800 dark:peer-data-[active=true]/menu-button:text-slate-100", // Changed text-sidebar-accent-foreground
       "peer-data-[size=sm]/menu-button:top-1",
       "peer-data-[size=default]/menu-button:top-1.5",
       "peer-data-[size=lg]/menu-button:top-2.5",
@@ -691,7 +696,7 @@ const SidebarMenuSub = React.forwardRef<
     ref={ref}
     data-sidebar="menu-sub"
     className={cn(
-      "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5",
+      "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-slate-300 dark:border-slate-700 px-2.5 py-0.5", // Changed border-sidebar-border
       "group-data-[collapsible=icon]:hidden",
       className
     )}
@@ -723,8 +728,8 @@ const SidebarMenuSubButton = React.forwardRef<
       data-size={size}
       data-active={isActive}
       className={cn(
-        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground outline-none ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
-        "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
+        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-slate-700 dark:text-slate-200 outline-none ring-slate-400 dark:ring-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100 focus-visible:ring-2 active:bg-slate-200 dark:active:bg-slate-700 active:text-slate-800 dark:active:text-slate-100 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-slate-800 dark:[&>svg]:text-slate-100", // Changed all sidebar-* colors
+        "data-[active=true]:bg-slate-200 dark:data-[active=true]:bg-slate-700 data-[active=true]:text-slate-800 dark:data-[active=true]:text-slate-100", // Changed active colors
         size === "sm" && "text-xs",
         size === "md" && "text-sm",
         "group-data-[collapsible=icon]:hidden",

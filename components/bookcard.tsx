@@ -32,11 +32,10 @@ export default function BookCard({ book }: BookCardProps) {
     <div 
       className="border border-gray-200 bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out flex flex-col transform hover:-translate-y-1"
     >
+      <div>
       <Link
         href={`/book/${book.book_id}`}
-        className="block group h-full flex flex-col"
-        legacyBehavior>
-        <a>
+        className="block group h-full flex flex-col">
         <div className="relative w-full aspect-[2/3] bg-gray-100">
           <Image
             src={imageToDisplay}
@@ -62,8 +61,8 @@ export default function BookCard({ book }: BookCardProps) {
             </p>
           </div>
         </div>
-        </a>
       </Link>
+      </div>
     </div>
   );
 }
