@@ -36,7 +36,6 @@ async function CommentCard({ book_id }: { book_id: number }) {
                                     <Rating rating={rating.rating} />
                                 </div>
 
-                                <p className='mt-2 text-gray-700'>{rating.review}</p>
                             </div>
                         </div>
                         <Separator className='max-w-lg' />

@@ -24,7 +24,11 @@ async function ProfilePage() {
       <h1 className="text-2xl font-bold mb-4">Hồ sơ cá nhân</h1>
 
       {session?.user.role === 'member' && user_details && (
-        <ProfileForm user={{ ...user_details, date_of_birth: user_details.date_of_birth.toISOString() }} />
+        <ProfileForm user={{ 
+          ...user_details, 
+          date_of_birth: user_details.date_of_birth.toISOString(), 
+          gender: user_details.gender ?? undefined 
+        }} />
         )}
 
       <div className='pt-2'>

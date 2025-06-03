@@ -9,6 +9,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  Nam
+  Nữ
+  Khác
+}
+
+
 model users {
   user_id          Int                @id @default(autoincrement())
   username         String             @unique @db.VarChar(50)
@@ -195,8 +202,4 @@ model reservations {
   users            users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "reservations_ibfk_2")
 }
 
-enum Gender {
-  Nam
-  // Nữ
-  // Khác
-}
+

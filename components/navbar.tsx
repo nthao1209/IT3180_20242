@@ -26,7 +26,6 @@ function Navbar() {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Library resources</NavigationMenuTrigger>
                 <NavigationMenuContent>
                 </NavigationMenuContent>
               </NavigationMenuItem>

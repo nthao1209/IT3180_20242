@@ -1,7 +1,4 @@
 import { auth, signIn } from '@/auth'
-// import BorrowingHistory from '@/components/borrowing-history'
-import Checkout from '@/components/checkout'
-import Fines from '@/components/fines'
 import OnHold from '@/components/on-hold'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import React from 'react'

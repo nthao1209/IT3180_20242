@@ -1,18 +1,19 @@
-
 import BackButton from '@/components/back-button'
-import CommentCard from '@/components/comment-card'
 import CommentBox from '@/components/comment-box'
-import CommentListWrapper from '@/components/CommentListWrapper'
+import CommentCard from '@/components/comment-card'
+import CommentList from '@/components/CommentList' // Nhập CommentList
 import HoldButton from '@/components/hold-button'
 import Rating from '@/components/rating'
-import StaffPickButton from '@/components/staff-pick-button'
 import { Separator } from '@/components/ui/separator'
 import { prisma } from '@/lib/prisma'
 import { BookOpen } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { auth } from "@/auth"
+import { auth } from '@/auth' 
 import React from 'react'
+import LikeButton from '@/components/like-button'
+import PurchaseButton from '@/components/purchase-button'
+import { notFound } from 'next/navigation'
 
 type BookCategoryLink = {
   category_id: number;
@@ -25,99 +26,92 @@ type BookDetails = {
   name: string;
   book_id: number;
   isbn: string;
-  author?: string | null;
   description: string | null;
   cover_image: string | null;
   file_path: string | null;
   price: any;
-  published_date: Date | null;
+  published_date: number;
   created_at: Date;
   no_of_copies?: number;
   publish_year?: string | number;
   ratings?: { rating: number }[];
   book_photos?: { url: string }[];
   book_category_links?: BookCategoryLink[];
-  totalPages?: number | null;
+  users: { name: string };
+  author?: string | null;
 };
 
-async function BookDetailsPage({ params }: { params: { book_id: number } }) {
+export default async function BookPage({ params }: { params: { book_id: string } }) {
   const session = await auth()
-  if (!session) return null
-  const user_id = Number(session.user.id)
-
-  const p = await params;
-  const bookId = +p.book_id;
-
-  const [raw_book_details, stats, reservation_count]: [any, any, number] = await prisma.$transaction([
-    prisma.books.findUnique({
-      where: {
-        book_id: +p.book_id,
+  const book = await prisma.books.findUnique({
+    where: {
+      book_id: Number(params.book_id)
+    },
+    include: {
+      users: {
+        select: {
+          name: true
+        }
       },
-      include: {
-        ratings: {
-          select: { rating: true }
-        },
-        book_category_links: {
-          include: {
-            book_categories: {
-              select: { category_name: true }
-            }
+      book_photos: true,
+      ratings: {
+        select: {
+          rating: true
+        }
+      },
+      book_category_links: {
+        include: {
+          book_categories: {
+            select: { category_name: true }
           }
-        },
-        book_photos: {
-          select: { url: true }
         }
       }
-    }),
-    prisma.ratings.aggregate({
-      _avg: { rating: true },
-      _count: { rating: true },
-      where: { book_id: +p.book_id }
-    }),
-    prisma.reservations.count({
-      where: { book_id: +p.book_id }
-    }),
-  ])
-
-  const book_details: BookDetails | null = raw_book_details
-    ? {
-        ...raw_book_details,
-        published_date: raw_book_details.published_date
-          ? new Date(raw_book_details.published_date)
-          : null,
-      }
-    : null;
-
-  if (!book_details) {
-    return <div>Không tìm thấy sách!</div>
-  }
-
-  const copies_available = () => {
-    if (book_details?.no_of_copies != null) {
-      const count = book_details.no_of_copies - reservation_count
-      return count < 0 ? 0 : count
     }
-    return 0
+  })
+
+  if (!book) {
+    notFound()
   }
+
+  const stats = await prisma.ratings.aggregate({
+    _avg: { rating: true },
+    _count: { rating: true },
+    where: { book_id: Number(params.book_id) }
+  })
+
+  const reservation_count = await prisma.user_books.count({
+    where: { book_id: Number(params.book_id) }
+  })
+
+  const isLiked = session?.user ? await prisma.liked_books.findFirst({
+    where: {
+      AND: [
+        { book_id: Number(params.book_id) },
+        { user_id: parseInt(session.user.id) }
+      ]
+    }
+  }) : null
+
+  const authorName = book.users?.name ?? null
 
   return (
-    <div className='max-w-6xl mx-auto'>
+    <div className="container mx-auto px-4 py-8">
       <BackButton />
       <div className="flex flex-col lg:flex-row p-4 pt-16 space-y-8 sm:space-x-4">
-        {(book_details.book_photos?.[0]?.url || book_details.cover_image) && (
+        {book.book_photos?.[0]?.url && (
           <Image
             width={200}
-            height={300}
-            src={book_details.book_photos?.[0]?.url || book_details.cover_image || '/default-book-cover.jpg'}
-            alt={book_details.name}
+            height={0}
+            src={book.book_photos[0].url}
+            alt='book'
             className='object-cover h-auto rounded-l-md'
           />
         )}
 
         <div className="flex-grow max-w-3xl">
-          <h1 className='text-2xl font-bold text-gray-800 mb-1 capitalize'>{book_details.name}</h1>
+          <h1 className='text-2xl font-bold text-gray-800 mb-1 capitalize'>{book.name}</h1>
           <p className="text-blue-500 font-medium mb-3 capitalize">
-            {book_details.author}
+            {authorName}
           </p>
 
           <div className="flex items-center space-x-1 mb-3">
@@ -127,45 +121,58 @@ async function BookDetailsPage({ params }: { params: { book_id: number } }) {
 
           <div className="flex items-center gap-2 mb-4">
             <div className='flex p-2 text-green-700 border border-green-500 rounded-md space-x-1'>
-              <BookOpen /><span>Book,</span><span>{book_details.publish_year}</span>
+              <BookOpen /><span>Book,</span><span>{book.published_date}</span>
             </div>
 
-            {book_details.book_category_links?.map(bcl => (
+            {book.book_category_links?.map(bcl => (
               <div key={bcl.category_id} className='capitalize px-4 py-2 text-gray-500 border border-gray-300 rounded-md'>
                 {bcl.book_categories.category_name}
               </div>
             ))}
           </div>
           <p className="text-gray-700 leading-6 mb-6">
-            {book_details.description || "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."}
+            {book.description || "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."}
           </p>
         </div>
 
-        <div className="flex flex-col space-y-2 flex-grow">
+        <div className="lg:w-64 flex flex-col space-y-4">
           <div className="text-gray-600 flex flex-row space-x-4 sm:space-x-0 sm:flex-col sm:space-y-1 bg-green-50 p-2 border-l-4 border-green-500">
             <p className="text-green-700 font-medium pb-2">Tình trạng</p>
-            <p className='text-sm'><span className='font-bold'>{book_details.no_of_copies}</span> bản</p>
-            <p className='text-sm'><span className='font-bold'>{copies_available()}</span> bản sẵn có</p>
             <p className='text-sm'><span className='font-bold'>{reservation_count}</span> bản đang giữ</p>
           </div>
 
-          <HoldButton book_id={p.book_id} />
-          <StaffPickButton book_id={p.book_id} />
+          <div className="flex flex-col space-y-2">
+            {session?.user && (
+              <LikeButton 
+                bookId={Number(params.book_id)} 
+                initialLiked={!!isLiked} 
+              />
+            )}
+            <PurchaseButton
+              bookId={book.book_id}
+              price={Number(book.price)}
+              name={book.name}
+              author={{ name: authorName }}
+              cover_image={book.cover_image}
+            />
+            <HoldButton book_id={Number(params.book_id)} />
+          </div>
         </div>
       </div>
 
       <Separator className='mt-4 mb-4' />
 
+      {/* Phần đánh giá */}
       <div>
         <h2 className='text-xl font-bold mb-3'>Đánh giá</h2>
         {session?.user ? (
           <>
-            <CommentBox book_id={book_details.book_id} />
-            <CommentCard book_id={book_details.book_id} />
+            <CommentBox book_id={Number(params.book_id)} />
+            <CommentCard book_id={Number(params.book_id)} />
           </>
         ) : (
           <p className='font-bold border rounded-sm p-4'>
-            <Link href={`/auth/signin?callbackUrl=/book/${book_details.book_id}`} className='text-blue-500'>
+            <Link href={`/auth/signin?callbackUrl=/book/${params.book_id}`} className='text-blue-500'>
               Đăng nhập
             </Link> để gửi đánh giá
           </p>
@@ -174,13 +181,14 @@ async function BookDetailsPage({ params }: { params: { book_id: number } }) {
 
       <Separator className='mt-4 mb-4' />
 
+      {/* Phần bình luận */}
       <div>
         <h2 className='text-xl font-bold mb-3'>Bình luận</h2>
         {session?.user ? (
-          <CommentListWrapper bookId={book_details.book_id} />
+          <CommentList bookId={Number(params.book_id)} />
         ) : (
           <p className='font-bold border rounded-sm p-4'>
-            <Link href={`/auth/signin?callbackUrl=/book/${book_details.book_id}`} className='text-blue-500'>
+            <Link href={`/auth/signin?callbackUrl=/book/${params.book_id}`} className='text-blue-500'>
               Đăng nhập
             </Link> để gửi bình luận
           </p>
@@ -189,5 +197,3 @@ async function BookDetailsPage({ params }: { params: { book_id: number } }) {
     </div>
   )
 }
-
-export default BookDetailsPage
