@@ -31,12 +31,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
-<<<<<<< HEAD
-google_drive.json
-=======
+.env
 .env.local
->>>>>>> origin/search-and-read
+.env.*.local 
+
+google_drive.json
 
 # vercel
 .vercel
