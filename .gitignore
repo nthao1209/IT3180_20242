@@ -45,3 +45,6 @@ google_drive.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+.vs/
