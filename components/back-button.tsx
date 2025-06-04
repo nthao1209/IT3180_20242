@@ -6,12 +6,16 @@ import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { ArrowLeft } from 'lucide-react'
 
-function BackButton({ styles }: { styles?: string}) {
-    const router = useRouter()
+function BackButton({ styles }: { styles?: string }) {
+  const router = useRouter()
   return (
-
-    <Button onClick={() => router.back()} variant='link' className={cn(styles, 'flex')}>
-        <ArrowLeft size={16}/> Go Back
+    <Button
+      onClick={() => router.back()}
+      variant="link"
+      className={cn('inline-flex items-center gap-1', styles)}
+    >
+      <ArrowLeft size={16} />
+      Go Back
     </Button>
   )
 }

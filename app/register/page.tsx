@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import BackButton from '@/components/back-button'
 
 const formSchema = z.object({
   username: z.string().min(3, { message: 'Tên người dùng quá ngắn' }),
@@ -83,6 +84,7 @@ export default function RegisterPage({
           {searchParams.error}
         </p>
       )}
+      <BackButton />
       <div>
         <Label htmlFor="username">Tên đăng nhập</Label>
         <Input name="username" id="username" required />

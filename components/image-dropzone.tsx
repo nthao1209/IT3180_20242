@@ -4,8 +4,6 @@ import { useDropzone } from 'react-dropzone'
 import { Button } from './ui/button'
 import Image from 'next/image'
 import { Skeleton } from './ui/skeleton'
-import { deleteObject, getDownloadURL, uploadBytes } from 'firebase/storage'
-import { storageRef } from '@/lib/firebase'
 
 type UploadInterface = {
     file: File | null
@@ -54,7 +52,6 @@ function ImageDropzone({
         const promises: Promise<UploadInterface>[] = []
 
         try {
-
             const addedFiles = acceptedFiles.map<UploadInterface>((file) => ({
                 file,
                 downloadUrl: '',
@@ -66,21 +63,31 @@ function ImageDropzone({
 
             addedFiles.map(async file => {
                 promises.push(
-
                     new Promise(async resolve => {
-                        const fileRef = storageRef(file.filename)
-                        
-                        // wait for upload
-                        await uploadBytes(fileRef, file.file as File)
+                        try {
+                            const formData = new FormData()
+                            formData.append('file', file.file as File)
 
-                        const downloadUrl = await getDownloadURL(fileRef)
+                            const response = await fetch('/api/upload/image', {
+                                method: 'POST',
+                                body: formData
+                            })
 
-                        resolve({
-                            file: file.file,
-                            filename: file.filename,
-                            state: file.state,
-                            downloadUrl: downloadUrl
-                        })
+                            if (!response.ok) {
+                                throw new Error('Failed to upload image')
+                            }
+
+                            const data = await response.json()
+                            resolve({
+                                file: file.file,
+                                filename: file.filename,
+                                state: 'complete',
+                                downloadUrl: data.filePath
+                            })
+                        } catch (error) {
+                            console.error('Error uploading file:', error)
+                            throw error
+                        }
                     })
                 )
             })
@@ -123,16 +130,29 @@ function ImageDropzone({
     })
 
     const _handleDelete = async (photourl: string) => {
+        try {
+            // Delete from server
+            const response = await fetch('/api/upload/image', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ filePath: photourl }),
+            })
 
-        // delete from firebase
-        const ref = storageRef(photourl)
-        await deleteObject(ref)
-        
-        // update local state
-        const newState = imageStates.filter(state => state.downloadUrl !== photourl)
-        setImageStates(newState)
+            if (!response.ok) {
+                throw new Error('Failed to delete image')
+            }
+            
+            // update local state
+            const newState = imageStates.filter(state => state.downloadUrl !== photourl)
+            setImageStates(newState)
 
-        onFileDelete?.(photourl)
+            onFileDelete?.(photourl)
+        } catch (error) {
+            console.error('Error deleting file:', error)
+            setError('Failed to delete file')
+        }
     }
 
     return (

@@ -1,20 +1,29 @@
-import AdminSidebar from '@/components/admin-sidebar'
-import { SidebarProvider } from '@/components/ui/sidebar'
-import React from 'react'
+// /admin/layout.tsx
 
-function AdminLayout({ children }: { children: React.ReactNode}) {
+"use client";
+
+import AdminSidebar from '@/components/admin-sidebar'; // Your component defined above
+import {
+  SidebarProvider,
+  SidebarInset,
+  // SidebarTrigger // Optional: if you want a manual trigger button outside the sidebar
+} from '@/components/ui/sidebar'; // Adjust path to your sidebar library
+import React from 'react';
+
+function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className='p-2 space-y-2'>
-        <SidebarProvider>
-            <AdminSidebar />
-            <div className="container">
-                {children}
-            </div>
+    <SidebarProvider defaultOpen={true}> {/* Sidebar starts open */}
+      {/* Your AdminSidebar component, which renders the <Sidebar> from the library */}
+      <AdminSidebar />
 
-        </SidebarProvider>
-
-    </div>
-  )
+      {/* SidebarInset is the main content area that respects the sidebar */}
+      <SidebarInset>
+        <div className="container mx-auto p-4 md:p-6 lg:p-8"> {/* Content padding and centering */}
+          {children}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
 }
 
-export default AdminLayout
+export default AdminLayout;

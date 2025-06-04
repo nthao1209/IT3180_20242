@@ -64,7 +64,6 @@ function MemberSidebar() {
           <SidebarFooter>
               <SidebarMenu>
                   <SidebarMenuItem>
-                      { <UserButton /> }
                   </SidebarMenuItem>
               </SidebarMenu>
           </SidebarFooter>

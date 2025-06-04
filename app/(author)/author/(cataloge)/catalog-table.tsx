@@ -14,7 +14,7 @@ type props = {
   total: number
 }
 
-function CatalogTable({ data }: { data: props }) {
+function CatalogTable({ data, total }: props) {
 
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false)
   const [itemToAction, setItemToAction] = useState<Book>()
@@ -48,8 +48,8 @@ function CatalogTable({ data }: { data: props }) {
     <>
       <DataTable
         columns={columns}
-        data={data.data}
-        total={data.total}
+        data={data}
+        total={total}
         filter_column='name'
         onRowDelete={handleRowDelete}
         onRowEdit={handleRowEdit}

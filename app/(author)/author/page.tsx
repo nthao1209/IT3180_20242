@@ -45,7 +45,7 @@ async function AuthorPage({
   return (
     <div>
       <AddBookButton />
-      <CatalogTable data={{data: books, total: total}} />
+      <CatalogTable data={books} total={total} />
     </div>
   )
 }

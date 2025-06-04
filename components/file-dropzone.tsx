@@ -2,20 +2,17 @@ import { Loader, FileUp, X } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Button } from './ui/button'
-import { Skeleton } from './ui/skeleton'
-import { deleteObject, getDownloadURL, uploadBytes } from 'firebase/storage'
-import { storageRef } from '@/lib/firebase'
 
 type FileUploadInterface = {
     file: File | null
-    downloadUrl: string
+    filePath: string
     filename: string
     state: 'pending' | 'complete' | 'error'
 }
 
 interface FileInputProps {
-    onFileAdded?: (downloadUrl: string) => Promise<void>
-    onFileDelete?: (url: string) => void
+    onFileAdded?: (filePath: string) => Promise<void>
+    onFileDelete?: (filePath: string) => void
     initialFile?: string | null
 }
 
@@ -32,8 +29,8 @@ function FileDropzone({
         if (initialFile) {
             setFileState({
                 file: null,
-                downloadUrl: initialFile,
-                filename: '', // Filename not typically available for pre-existing URLs
+                filePath: initialFile,
+                filename: initialFile.split('/').pop() || '',
                 state: 'complete',
             });
         }
@@ -48,24 +45,34 @@ function FileDropzone({
 
         const newFileState: FileUploadInterface = {
             file: file,
-            downloadUrl: '',
-            filename: `${Math.random().toString(36).slice(2, 10)}_${Date.now()}.${file.name.split('.').pop()}`,
+            filePath: '',
+            filename: file.name,
             state: 'pending',
         };
         setFileState(newFileState);
 
         try {
-            const fileRef = storageRef(newFileState.filename);
-            await uploadBytes(fileRef, file);
-            const downloadUrl = await getDownloadURL(fileRef);
+            const formData = new FormData();
+            formData.append('file', file);
 
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const data = await response.json();
+            
             setFileState(prevState => ({
                 ...prevState,
-                downloadUrl: downloadUrl,
+                filePath: data.filePath,
                 state: 'complete',
             } as FileUploadInterface));
 
-            await onFileAdded?.(downloadUrl);
+            await onFileAdded?.(data.filePath);
 
         } catch (err) {
             console.error("Error uploading file:", err);
@@ -81,20 +88,32 @@ function FileDropzone({
     }, [onFileAdded]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        accept: {}, // Accept all file types
+        accept: {
+            'application/epub+zip': ['.epub']
+        },
         maxFiles: 1,
         onDrop,
     });
 
     const _handleDelete = async () => {
-        if (fileState?.downloadUrl) {
+        if (fileState?.filePath) {
             setUploading(true);
             setError(null);
             try {
-                const ref = storageRef(fileState.downloadUrl);
-                await deleteObject(ref);
+                const response = await fetch('/api/upload', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ filePath: fileState.filePath }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Delete failed');
+                }
+
                 setFileState(null);
-                onFileDelete?.(fileState.downloadUrl);
+                onFileDelete?.(fileState.filePath);
             } catch (err) {
                 console.error("Error deleting file:", err);
                 if (err instanceof Error) {
