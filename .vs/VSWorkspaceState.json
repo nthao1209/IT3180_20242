@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\app",
+    "\\app\\(admin)",
+    "\\app\\(admin)\\admin",
+    "\\app\\(admin)\\admin\\activities",
+    "\\app\\(admin)\\admin\\categories",
+    "\\app\\(admin)\\admin\\requests",
+    "\\components",
+    "\\prisma",
+    "\\prisma\\sql"
+  ],
+  "SelectedNode": "\\components\\pending-purchases.tsx",
+  "PreviewInSolutionExplorer": false
+}

@@ -1,76 +1,58 @@
-import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
-import React from 'react'
-import { getReservationRankForBook } from '@prisma/client/sql'
-import Image from 'next/image'
-import { formatISBN } from '@/lib/utils'
-import HoldButton from './hold-button'
+// 'use client'
 
-async function OnHold() {
+// import React from 'react'
+// import { getReservationRankForBook } from '@prisma/client/sql'
+// import { auth } from '@/auth'
+// import { prisma } from '@/lib/prisma'
+// import HoldButton from './hold-button'
 
-  const session = await auth()
+// async function OnHold() {
+//   const session = await auth()
+//   if (!session) return null
 
-  const results = await prisma.reservations.findMany({
-    where: {
-      user_id: Number(session?.user.id)
-    },
-    include: {
-      books: {
-        select: {
-          name: true,
-          author: true,
-          isbn: true,
-          book_photos: {
-            select: { url: true }
-          }
-        }
-      }
-    }
-  })
+//   const results = await prisma.reservations.findMany({
+//     where: {
+//       user_id: parseInt(session.user.id)
+//     },
+//     include: {
+//       books: {
+//         select: {
+//           name: true,
+//           book_id: true,
+//           cover_image: true,
+//           users: {
+//             select: {
+//               name: true
+//             }
+//           }
+//         }
+//       }
+//     }
+//   })
 
-  const getRankForUser = async (book_id: number) => {
-    const rank = await prisma.$queryRawTyped(getReservationRankForBook(book_id, session?.user.user_id as number))
+//   return (
+//     <div className="space-y-4">
+//       {results.map(result => {
+//         const book_id = result.book_id
+//         const rank = await prisma.$queryRawTyped(getReservationRankForBook(book_id, session?.user.user_id as number))
+//         return (
+//           <div key={result.reservation_id} className="flex items-center justify-between p-4 border rounded-lg">
+//             <div className="flex items-center space-x-4">
+//               {result.books.cover_image && (
+//                 <img src={result.books.cover_image} alt={result.books.name} className="w-16 h-24 object-cover" />
+//               )}
+//               <div>
+//                 <h3 className="font-semibold">{result.books.name}</h3>
+//                 <p className="text-sm text-gray-500">by {result.books.users.name}</p>
+//                 <p className="text-sm text-gray-500">Your position in queue: {rank[0].queue_number}</p>
+//               </div>
+//             </div>
+//             <HoldButton book_id={result.book_id} />
+//           </div>
+//         )
+//       })}
+//     </div>
+//   )
+// }
 
-    return rank.length > 0 ? rank[0].queue_number : 0
-  }
-
-  return (
-    <div className="space-y-2">
-      {
-        results.map(result => (
-          <div key={result.book_id} className="flex flex-col sm:flex-row p-4 sm:space-x-4 border rounded-sm justify-between" >
-
-            <div className="flex flex-col md:flex-row max-w-md sm:space-x-2">
-              <Image
-                width={100}
-                height={0}
-                src={result.books.book_photos[0].url!}
-                alt="Book Cover"
-                className="hidden sm:block object-fill rounded-l-md"
-              />
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-800 capitalize">{result.books?.name}</h1>
-                <p className="font-medium capitalize">
-                  By: {result.books.author}
-                </p>
-                <p className='text-slate-400'>{formatISBN(result.books.isbn)}</p>
-              </div>
-
-            </div>
-
-            <div className="flex flex-col space-y-1 max-w-2xl">
-              <div className=" text-green-600 bg-green-50 p-2 border-l-4 border-green-500 ">
-                <p className='font-bold'>You are # {getRankForUser(result.book_id)} in the waitlist.</p>
-              </div>
-
-              <HoldButton book_id={result.book_id} />
-            </div>
-
-          </div>
-        ))
-      }
-    </div>
-  )
-}
-
-export default OnHold
+// export default OnHold

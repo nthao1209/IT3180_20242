@@ -36,7 +36,7 @@ function ActivitiesTable({ data }: { data: props }) {
 
         if (itemToAction) {
 
-            startTransition( async () => {
+            startTransition(async () => {
                 await deleteActivity(itemToAction.activity_id, pathname)
             })
 
@@ -57,7 +57,7 @@ function ActivitiesTable({ data }: { data: props }) {
                 onRowEdit={handleRowEdit}
             />
             <AddActivityDialog open={open} setOpen={setOpen} activity={itemToAction} />
-            <ConfirmationDialog 
+            <ConfirmationDialog
                 open={openConfirmationDialog}
                 onClose={() => setOpenConfirmationDialog(false)}
                 onConfirm={handleConfirm}

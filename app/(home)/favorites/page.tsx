@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { FavoriteBookCard } from '@/components/bookcard'
+import BookCard from '@/components/bookcard'
 import { Heart } from 'lucide-react'
 
 async function FavoritesPage() {
@@ -15,7 +15,7 @@ async function FavoritesPage() {
     )
   }
 
-  const likedBooks = await prisma.liked_books.findMany({
+  const favorites = await prisma.liked_books.findMany({
     where: {
       user_id: parseInt(session.user.id)
     },
@@ -41,16 +41,16 @@ async function FavoritesPage() {
         <h1 className="text-3xl font-bold text-gray-800">My Favorites</h1>
       </div>
 
-      {likedBooks.length === 0 ? (
-        <p className="text-center text-gray-500">You haven't liked any books yet.</p>
+      {favorites.length === 0 ? (
+        <p className="text-center text-gray-500">You haven't added any books to your favorites yet.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {likedBooks.map((likedBook) => (
-            <FavoriteBookCard 
-              key={likedBook.book_id} 
+          {favorites.map((favorite) => (
+            <BookCard 
+              key={favorite.book_id} 
               book={{
-                ...likedBook.book,
-                author: likedBook.book.users
+                ...favorite.book,
+                author: favorite.book.users
               }} 
             />
           ))}

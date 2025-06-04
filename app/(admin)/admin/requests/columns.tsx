@@ -17,16 +17,16 @@ export type Request = {
 }
 
 type ColumnProps = {
-  onApprove: (item: Request) => void
-  onReject: (item: Request) => void
-  onView: (item: Request) => void
+  onApproveAction: (item: Request) => void
+  onRejectAction: (item: Request) => void
+  onViewAction: (item: Request) => void
 }
 
 type Photo = {
     photo_id: number,
     url: string
 }
-export function columns({ onApprove, onReject, onView }: ColumnProps): ColumnDef<Request>[] {
+export function columns({ onApproveAction, onRejectAction, onViewAction }: ColumnProps): ColumnDef<Request>[] {
   return [
       {
       accessorKey: 'book_photos',
@@ -85,9 +85,9 @@ export function columns({ onApprove, onReject, onView }: ColumnProps): ColumnDef
         const item = row.original
         return (
           <div className='flex gap-2'>
-            <Button variant='outline' size='sm' onClick={() => onView(item)}>Check</Button>
-            <Button variant='success' size='sm' onClick={() => onApprove(item)}>Accept</Button>
-            <Button variant='destructive' size='sm' onClick={() => onReject(item)}>Reject</Button>
+            <Button variant='outline' size='sm' onClick={() => onViewAction(item)}>Check</Button>
+            <Button variant='default' size='sm' onClick={() => onApproveAction(item)}>Accept</Button>
+            <Button variant='destructive' size='sm' onClick={() => onRejectAction(item)}>Reject</Button>
           </div>
         )
       }

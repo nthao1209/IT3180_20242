@@ -5,6 +5,7 @@ import Navbar from '@/components/navbar';
 import { CartProvider } from '@/contexts/cart-context';
 import { Session } from 'inspector/promises';
 import { SessionProvider } from 'next-auth/react';
+import { Toaster } from 'sonner';
 import React from 'react';
 
 export default function HomeLayout({ children }: {
@@ -20,6 +21,7 @@ export default function HomeLayout({ children }: {
             {children} {/* HomePage sẽ được render ở đây */}
         </main>
         <Footer/>
+        <Toaster position="top-right" />
        </div>
     </CartProvider>
   </SessionProvider>

@@ -1,8 +1,6 @@
 import BackButton from '@/components/back-button'
 import CommentBox from '@/components/comment-box'
 import CommentCard from '@/components/comment-card'
-import CommentList from '@/components/CommentList' // Nhập CommentList
-import HoldButton from '@/components/hold-button'
 import Rating from '@/components/rating'
 import { Separator } from '@/components/ui/separator'
 import { prisma } from '@/lib/prisma'
@@ -42,10 +40,16 @@ type BookDetails = {
 };
 
 export default async function BookPage({ params }: { params: { book_id: string } }) {
+  // Validate book_id parameter
+  const bookId = parseInt(params.book_id);
+  if (isNaN(bookId)) {
+    notFound();
+  }
+
   const session = await auth()
   const book = await prisma.books.findUnique({
     where: {
-      book_id: Number(params.book_id)
+      book_id: bookId
     },
     include: {
       users: {
@@ -76,17 +80,13 @@ export default async function BookPage({ params }: { params: { book_id: string }
   const stats = await prisma.ratings.aggregate({
     _avg: { rating: true },
     _count: { rating: true },
-    where: { book_id: Number(params.book_id) }
-  })
-
-  const reservation_count = await prisma.user_books.count({
-    where: { book_id: Number(params.book_id) }
+    where: { book_id: bookId }
   })
 
   const isLiked = session?.user ? await prisma.liked_books.findFirst({
     where: {
       AND: [
-        { book_id: Number(params.book_id) },
+        { book_id: bookId },
         { user_id: parseInt(session.user.id) }
       ]
     }
@@ -124,7 +124,7 @@ export default async function BookPage({ params }: { params: { book_id: string }
               <BookOpen /><span>Book,</span><span>{book.published_date}</span>
             </div>
 
-            {book.book_category_links?.map(bcl => (
+            {book.book_category_links?.map((bcl: BookCategoryLink) => (
               <div key={bcl.category_id} className='capitalize px-4 py-2 text-gray-500 border border-gray-300 rounded-md'>
                 {bcl.book_categories.category_name}
               </div>
@@ -135,28 +135,20 @@ export default async function BookPage({ params }: { params: { book_id: string }
           </p>
         </div>
 
-        <div className="lg:w-64 flex flex-col space-y-4">
-          <div className="text-gray-600 flex flex-row space-x-4 sm:space-x-0 sm:flex-col sm:space-y-1 bg-green-50 p-2 border-l-4 border-green-500">
-            <p className="text-green-700 font-medium pb-2">Tình trạng</p>
-            <p className='text-sm'><span className='font-bold'>{reservation_count}</span> bản đang giữ</p>
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            {session?.user && (
-              <LikeButton 
-                bookId={Number(params.book_id)} 
-                initialLiked={!!isLiked} 
-              />
-            )}
-            <PurchaseButton
-              bookId={book.book_id}
-              price={Number(book.price)}
-              name={book.name}
-              author={{ name: authorName }}
-              cover_image={book.cover_image}
+        <div className="lg:w-64 flex flex-col space-y-2">
+          {session?.user && (
+            <LikeButton 
+              bookId={bookId} 
+              initialLiked={!!isLiked} 
             />
-            <HoldButton book_id={Number(params.book_id)} />
-          </div>
+          )}
+          <PurchaseButton
+            bookId={book.book_id}
+            price={Number(book.price)}
+            name={book.name}
+            author={{ name: authorName }}
+            cover_image={book.cover_image}
+          />
         </div>
       </div>
 
@@ -167,8 +159,8 @@ export default async function BookPage({ params }: { params: { book_id: string }
         <h2 className='text-xl font-bold mb-3'>Đánh giá</h2>
         {session?.user ? (
           <>
-            <CommentBox book_id={Number(params.book_id)} />
-            <CommentCard book_id={Number(params.book_id)} />
+            <CommentBox book_id={bookId} />
+            <CommentCard book_id={bookId} />
           </>
         ) : (
           <p className='font-bold border rounded-sm p-4'>
@@ -185,7 +177,9 @@ export default async function BookPage({ params }: { params: { book_id: string }
       <div>
         <h2 className='text-xl font-bold mb-3'>Bình luận</h2>
         {session?.user ? (
-          <CommentList bookId={Number(params.book_id)} />
+          <div>
+            {String(bookId)}
+          </div>
         ) : (
           <p className='font-bold border rounded-sm p-4'>
             <Link href={`/auth/signin?callbackUrl=/book/${params.book_id}`} className='text-blue-500'>

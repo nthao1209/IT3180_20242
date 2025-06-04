@@ -14,9 +14,12 @@ interface LikeButtonProps {
 
 export default function LikeButton({ bookId, initialLiked }: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(initialLiked)
+  const [isLoading, setIsLoading] = useState(false)
   const path = usePathname()
 
   const handleLike = async () => {
+    if (isLoading) return
+    setIsLoading(true)
     try {
       if (isLiked) {
         await unlikeBook(bookId, path)
@@ -27,7 +30,14 @@ export default function LikeButton({ bookId, initialLiked }: LikeButtonProps) {
       }
       setIsLiked(!isLiked)
     } catch (error) {
-      toast.error('Failed to update favorites')
+      if (error instanceof Error) {
+        toast.error(error.message || 'Failed to update favorites')
+      } else {
+        toast.error('Failed to update favorites')
+      }
+      console.error('Error updating favorites:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -36,12 +46,13 @@ export default function LikeButton({ bookId, initialLiked }: LikeButtonProps) {
       variant="outline"
       size="sm"
       onClick={handleLike}
+      disabled={isLoading}
       className={`flex items-center gap-2 ${
         isLiked ? 'text-red-500 border-red-500 hover:bg-red-50' : ''
       }`}
     >
       <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500' : ''}`} />
-      {isLiked ? 'Liked' : 'Like'}
+      {isLiked ? 'Favorited' : 'Add to Favorites'}
     </Button>
   )
 } 

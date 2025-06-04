@@ -121,6 +121,7 @@ function FileDropzone({
                         onClick={_handleDelete}
                         className="rounded-full text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500"
                         disabled={uploading}
+                        aria-label="Delete file"
                     >
                         <X className="h-4 w-4" />
                     </button>

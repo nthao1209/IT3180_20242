@@ -7,43 +7,44 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import BankPayment from '@/components/bank-payment-form'
+import { processCheckout } from '@/actions/actions'
 
 export default function CartPage() {
   const { cart, removeFromCart, getTotalPrice, clearCart } = useCart()
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [referenceNumber, setReferenceNumber] = useState('')
 
-  const handleCheckout = async () => {
+  const handlePaymentSubmit = async () => {
     if (cart.length === 0) {
-      toast.error('Your cart is empty')
-      return
+      toast.error('Your cart is empty or the book is not available')
+      return ''
     }
 
     setIsProcessing(true)
     try {
-      // Create checkout session
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: cart.map(item => ({
-            book_id: item.book_id,
-            price: item.price
-          }))
-        }),
-      })
+      const result = await processCheckout(
+        cart.map(item => ({
+          book_id: item.book_id,
+          price: item.price
+        }))
+      )
 
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session')
+      if (result.success) {
+        //setReferenceNumber(result.referenceNumber)
+        toast.success(result.message)
+        //router.push(`/purchase/pending?ref=${result.referenceNumber}`)
+        return result.referenceNumber
+
+      } else {
+        throw new Error('Failed to process payment')
       }
-
-      const { url } = await response.json()
-      clearCart()
-      router.push(url)
     } catch (error) {
-      toast.error('Failed to process checkout')
+      toast.error(error instanceof Error ? error.message : 'Failed to process payment')
+      console.error('Payment error:', error)
+      return ''
     } finally {
       setIsProcessing(false)
     }
@@ -51,61 +52,82 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8 flex items-center gap-2">
-        <ShoppingCart className="h-6 w-6" />
-        Shopping Cart
-      </h1>
+      <h1 className="text-2xl font-bold mb-8">Shopping Cart</h1>
 
       {cart.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">Your cart is empty</p>
-          <Button onClick={() => router.push('/catalog')}>
+        <div className="text-center py-12">
+          <ShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
+          <h2 className="mt-4 text-lg font-semibold">Your cart is empty</h2>
+          <p className="mt-2 text-gray-600">Add some books to your cart to get started</p>
+          <Button
+            className="mt-4"
+            onClick={() => router.push('/catalog')}
+          >
             Browse Books
           </Button>
         </div>
       ) : (
-        <div className="space-y-6">
-          <div className="space-y-4">
-            {cart.map((item) => (
-              <div key={item.book_id} className="flex items-center gap-4 p-4 border rounded-lg">
-                {item.cover_image && (
-                  <Image
-                    src={item.cover_image}
-                    alt={item.name}
-                    width={100}
-                    height={150}
-                    className="object-cover rounded"
-                  />
-                )}
-                <div className="flex-1">
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-gray-600">{item.author.name}</p>
-                  <p className="text-green-600 font-medium">${item.price.toFixed(2)}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="space-y-4">
+              {cart.map((item) => (
+                <div key={item.book_id} className="flex items-center gap-4 p-4 border rounded-lg">
+                  {item.cover_image && (
+                    <Image
+                      src={item.cover_image}
+                      alt={item.name}
+                      width={100}
+                      height={150}
+                      className="object-cover rounded"
+                    />
+                  )}
+                  <div className="flex-grow">
+                    <h3 className="font-semibold">{item.name}</h3>
+                    <p className="text-gray-600">{item.author?.name}</p>
+                    <p className="text-green-600 font-medium">${item.price.toFixed(2)}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeFromCart(item.book_id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => removeFromCart(item.book_id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-lg font-semibold">Total:</span>
-              <span className="text-xl font-bold">${getTotalPrice().toFixed(2)}</span>
+          <div className="lg:col-span-1">
+            <div className="border rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>${getTotalPrice().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span>${getTotalPrice().toFixed(2)}</span>
+                </div>
+              </div>
+
+              {!showPayment ? (
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => setShowPayment(true)}
+                  disabled={isProcessing}
+                >
+                  Proceed to Payment
+                </Button>
+              ) : (
+                <BankPayment
+                  totalAmount={getTotalPrice()}
+                  onPaymentSubmit={handlePaymentSubmit}
+                />
+              )}
             </div>
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={handleCheckout}
-              disabled={isProcessing}
-            >
-              {isProcessing ? 'Processing...' : 'Proceed to Checkout'}
-            </Button>
           </div>
         </div>
       )}

@@ -25,9 +25,12 @@ interface BookCardProps {
 }
 
 export default function BookCard({ book }: BookCardProps) {
-  const imageToDisplay = book.cover_image // Ưu tiên cover_image
-                       || (book.book_photos && book.book_photos.length > 0 ? book.book_photos[0].url : null) // Fallback về ảnh đầu tiên trong book_photos
-                       || '/default-book-cover.png'; // Fallback cuối cùng
+  const imageToDisplay = book.cover_image 
+    || (book.book_photos && book.book_photos.length > 0 ? book.book_photos[0].url : null)
+    || '/default-book-cover.png';
+    
+  console.log('Book image URL:', imageToDisplay); // Add this line for debugging
+  
   return (
     <div 
       className="border border-gray-200 bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out flex flex-col transform hover:-translate-y-1"

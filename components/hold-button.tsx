@@ -1,30 +1,26 @@
-import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
-import React from 'react'
-import CancelHoldButton from './cancel-hold-button'
-import PlaceHoldButton from './place-hold-button'
+// 'use client'
 
-async function HoldButton({ book_id }: { book_id: number }) {
+// import React from 'react'
+// import CancelHoldButton from './cancel-hold-button'
+// import PlaceHoldButton from './place-hold-button'
 
-    const session = await auth()
+// async function HoldButton({ book_id }: { book_id: number }) {
+//   const session = await auth()
+//   if (!session) return null
 
-    if (!session) return null
+//   const reservation = await prisma.reservations.findFirst({
+//     where: {
+//       AND: [
+//         { book_id },
+//         { user_id: parseInt(session.user.id) }
+//       ]
+//     }
+//   })
 
-    const reservation = await prisma.reservations.findFirst({
-        where: {
-            user_id: Number(session.user.id),
-            book_id: +book_id
-        }
-    })
+//   return (
+//     reservation ? <CancelHoldButton reservation_id={reservation.reservation_id} />
+//     : <PlaceHoldButton book_id={book_id} />
+//   )
+// }
 
-    return (
-        <>
-        {
-            reservation ? <CancelHoldButton reservation_id={reservation.reservation_id} /> 
-            : <PlaceHoldButton book_id={book_id} />
-        }
-        </>
-    )
-}
-
-export default HoldButton
+// export default HoldButton

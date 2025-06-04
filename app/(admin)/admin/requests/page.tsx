@@ -10,17 +10,29 @@ import { prisma } from '@/lib/prisma'
 
 
 async function getBookRequests(): Promise<{ data: Request[], total: number }> {
-  const dbResults = await prisma.bookRequest.findMany({
-    orderBy: { requested_at: 'desc' }
+  const dbResults = await prisma.book_requests.findMany({
+    orderBy: { created_at: 'desc' },
+    include: {
+      books: {
+        select: {
+          name: true,
+          users: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }
+    }
   })
 
   const requests: Request[] = dbResults.map(req => ({
-    id: req.id,
-    book_title: req.book_title,
-    author_name: req.author ?? 'Không rõ',
-    type: (req.type === 'add' ? 'create' : req.type) as "create" | "update" | "delete",
+    id: req.request_id,
+    book_title: req.books?.name ?? 'Unknown',
+    author_name: req.books?.users?.name ?? 'Unknown',
+    type: (req.action === 'add' ? 'create' : req.action) as "create" | "update" | "delete",
     status: req.status as "pending" | "approved" | "rejected",
-    created_at: req.requested_at.toISOString(),
+    created_at: req.created_at.toISOString(),
   }))
 
   return {
