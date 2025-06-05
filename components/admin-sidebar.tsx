@@ -1,22 +1,14 @@
 // @/components/admin-sidebar.tsx
-// THIS FILE IS LARGELY CORRECT.
-// The "fix" for layout is in AdminLayout.tsx
+'use client'; // Giữ nguyên đây là Client Component
 
 import React from 'react';
-import {
-  Sidebar, // This is the main <Sidebar> component from your library
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from './ui/sidebar'; // Assuming this is the correct path
-import { Library, MapIcon, User2, Mail } from 'lucide-react';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'; // Đảm bảo đường dẫn đúng
+import { Library, MapIcon, User2, Mail, BarChart } from 'lucide-react'; // Bỏ CreditCard, LogOut nếu không dùng trực tiếp ở đây
 import Link from 'next/link';
-import UserButton from './user-button'; // Ensure this component is styled appropriately
+// KHÔNG import UserButton trực tiếp ở đây nữa
+// import UserButton from './user-button';
 
-const menu_items = [
+const menuItems = [
   {
     title: 'Catalog',
     url: '/admin',
@@ -37,35 +29,46 @@ const menu_items = [
     url: '/admin/requests',
     icon: Mail,
   },
+  // Bạn có thể thêm lại 'Reports' nếu cần
+  // {
+  //   title: 'Reports',
+  //   url: '/admin/reports',
+  //   icon: BarChart,
+  // },
 ];
 
-function AdminSidebar() {
+// Định nghĩa kiểu cho props của AdminSidebar
+interface AdminSidebarProps {
+  userActionsElement?: React.ReactNode; // Prop để nhận UserButton (hoặc bất kỳ ReactNode nào khác)
+}
+
+export default function AdminSidebar({ userActionsElement }: AdminSidebarProps) { // Nhận prop userActionsElement
   return (
-    // The <Sidebar> component from your library is used here.
-    // It will render the placeholder and the fixed positioned visual sidebar.
     <Sidebar
-      variant="floating" // This variant makes the sidebar "float" with rounded corners and a shadow.
-      collapsible="icon"  // Allows collapsing to icon-only mode.
-      side="left"         // Default is "left", but good to be explicit.
-      // className="p-0" // This might not be necessary or could be removed if variant="floating" handles its own outer spacing/appearance.
-                          // The padding inside the floating box is handled by its child elements.
+      variant="floating"
+      collapsible="icon"
+      side="left"
+      className="h-full" // Đảm bảo Sidebar có chiều cao để footer dính xuống dưới
     >
-      <SidebarHeader className="p-0 mb-4"> {/* p-0 overrides default p-2, mb-4 is fine */}
-        <p className="text-lg bg-black text-white p-2">Admin</p>
+      {/* Header */}
+      <SidebarHeader className="p-0 mb-4">
+        <div className="bg-black text-white p-2 text-lg font-medium text-center">
+          Admin
+        </div>
       </SidebarHeader>
 
-      <SidebarContent> {/* This has default p-2, which is usually good */}
+      {/* Main menu */}
+      <SidebarContent className="flex-grow"> {/* flex-grow để nội dung chính chiếm không gian còn lại */}
         <SidebarMenu>
-          {menu_items.map((item) => (
+          {menuItems.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild tooltip={item.title}>
-                {/* Added tooltip prop for when sidebar is collapsed */}
                 <Link
                   href={item.url}
-                  // className="flex items-center gap-2 w-full" // SidebarMenuButton already applies flex, gap, etc. This might be redundant.
+                  className="flex items-center gap-2 w-full py-2 px-3 hover:bg-gray-100 rounded"
                 >
-                  <item.icon className="h-4 w-4" /> {/* Explicit icon sizing can be good */}
-                  <span>{item.title}</span>
+                  <item.icon className="h-5 w-5 text-gray-600" />
+                  <span className="text-gray-800">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -73,14 +76,13 @@ function AdminSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter> {/* This has default p-2 */}
-        <SidebarMenu>
-          <SidebarMenuItem>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      {/* Footer */}
+      <SidebarFooter className="mt-auto border-t border-gray-200"> {/* Thêm border-gray-200 cho đẹp hơn */}
+        <div className="px-3 py-4 flex flex-col gap-2">
+          {/* User Profile / Logout được truyền từ component cha */}
+          {userActionsElement} {/* Sử dụng prop đã truyền vào */}
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
 }
-
-export default AdminSidebar;

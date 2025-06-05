@@ -21,6 +21,7 @@ async function AuthorPage({
         book_id: true,
         name: true,
         isbn: true,
+        file_path: true,
         author_id: true,
         price: true,
         state: true,

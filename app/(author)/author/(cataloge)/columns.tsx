@@ -15,12 +15,12 @@ export type Book = {
     book_id: number,
     name: string,
     isbn: string,
-    file_path: string,
+    file_path: string | null,
     price: number,
     book_category_links?: { category_id: number }[],
     book_photos?: Photo[],
     published_date: number,
-    author: string,
+    author_id: string,
     state: Boolean
 }
 

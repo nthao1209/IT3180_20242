@@ -69,7 +69,7 @@ async function main() {
       password: hashedPassword, // Có thể dùng chung mật khẩu cho user mẫu
       role: 'USER',
       date_of_birth: new Date('1995-05-20T00:00:00.000Z'),
-      gender: Gender.N_,
+      gender: Gender.Nữ,
     },
   });
   console.log(`Created/Ensured user: ${user2.name} (ID: ${user2.user_id})`);
