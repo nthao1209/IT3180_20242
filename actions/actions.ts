@@ -1532,6 +1532,109 @@ export async function createTestAccount() {
     }
 }
 
+
+//Yeeu cau xem giao dich mua sach (chi danh cho staff)
+export async function getUserBookTransactions() {
+    const session = await auth();
+    if (!session?.user) {
+        throw new Error("You must be logged in to view your transactions");
+    }
+    const userId = Number(session.user.id);
+    if (isNaN(userId)) {
+        throw new Error("Invalid user ID");
+    }
+    
+    try {
+        const transactions = await prisma.payments.findMany({
+            where: {
+                user_id: userId,
+                payment_books: {
+                    some: {}
+                }
+            },
+            include: {
+                payment_books: {
+                    include: {
+                        books: true
+                    }
+                }
+            },
+            orderBy: {
+                created_at: 'desc'
+            }
+        });
+
+        return transactions.map(transaction => ({
+            ...transaction,
+            created_at: transaction.created_at.toISOString(), // Convert Date to ISO string
+            payment_books: transaction.payment_books.map(pb => ({
+                ...pb,
+                books: {
+                    ...pb.books,
+                    created_at: pb.books.created_at.toISOString() // Convert book created_at to ISO string
+                }
+            }))
+        }));
+    } catch (error) {
+        console.error('Error fetching user book transactions:', error);
+        throw new Error('Failed to fetch your book transactions');
+    }
+
+
+}
+
+
+// Xem bao cao (gom doanh thu, sach ban, luot doc, danh gia)
+export async function getBookReport() {
+    const session = await auth();
+    if (!session?.user || session.user.role !== 'staff') {
+        throw new Error("You must be logged in as staff to view the report");
+    }
+
+    try {
+        const books = await prisma.books.findMany({
+            where: { state: true },
+            include: {
+                book_photos: { select: { url: true } },
+                ratings: { select: { rating: true } },
+                payment_books: {
+                    include: {
+                        payments: {
+                            select: { amount: true, created_at: true }
+                        }
+                    }
+                },
+                reading_sessions: {
+                    select: { last_read_timestamp: true }
+                }
+            }
+        });
+
+        // Process the data to calculate total revenue, average rating, etc.
+        const report = books.map(book => {
+            const totalRevenue = book.payment_books.reduce((sum, pb) => sum + pb.payments.amount, 0);
+            const averageRating = book.ratings.length > 0 ? 
+                (book.ratings.reduce((sum, r) => sum + r.rating, 0) / book.ratings.length).toFixed(2) : 'N/A';
+            const totalReads = book.reading_sessions.length;
+
+            return {
+                book_id: book.book_id,
+                name: book.name,
+                total_revenue: totalRevenue,
+                average_rating: averageRating,
+                total_reads: totalReads,
+                cover_photo_url: book.book_photos[0]?.url || null
+            };
+        });
+
+        return report;
+    } catch (error) {
+        console.error('Error fetching book report:', error);
+        throw new Error('Failed to fetch book report');
+    }
+}
+
+
 // //'use server'
 
 // import { prisma } from "@/lib/prisma"
