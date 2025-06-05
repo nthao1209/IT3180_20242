@@ -65,6 +65,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         if (!passwordMatch){
                             throw new Error('Invalid credentials')
                         }
+                    }else if(user.role === 'author'){
+                        const passwordMatch = await bcrypt.compare(
+                            credentials.password as string, user.password
+                        )
+
+                        if (!passwordMatch){
+                            throw new Error('Invalid credentials')
+                        }
                     }
             }
 

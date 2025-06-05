@@ -24,11 +24,6 @@ export const columns: ColumnDef<User>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
     },
     {
-        accessorKey: 'library_card_no',
-        enableSorting: false,
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Card no." />
-    },
-    {
         accessorKey: 'is_active',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Active" />,
         cell: ({ row }) => (

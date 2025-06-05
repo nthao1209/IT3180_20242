@@ -29,7 +29,6 @@ const formSchema = z.object({
     email: z.string().min(2, {
         message: "Email must be valid.",
     }),
-    library_card_no: z.string(),
     role: z.string(),
     is_active: z.boolean().default(true),
 })
@@ -44,7 +43,6 @@ function AddUserDialog({ open, setOpen, user }: Props) {
         defaultValues: {
             name: "",
             email: '',
-            library_card_no: '',
             role: 'member',
             is_active: true
         }
@@ -56,7 +54,6 @@ function AddUserDialog({ open, setOpen, user }: Props) {
             form.setValue('name',user.name)
             form.setValue('email',user.email)
             form.setValue('role',user.role)
-            form.setValue('library_card_no',user.library_card_no)
             form.setValue('is_active',user.is_active as boolean)
         }
     },[user, form])
@@ -67,10 +64,10 @@ function AddUserDialog({ open, setOpen, user }: Props) {
         setProcessing(true)
         if (user) {
             // update
-            await updateUser(values.user_id,values.name, values.email, values.library_card_no, values.role,values.is_active, path)
+            await updateUser(values.user_id,values.name, values.email,  values.role,values.is_active, path)
             message = 'User updated'
         } else {
-            await addUser(values.name, values.email, values.library_card_no, values.role, values.is_active, path)
+            await addUser(values.name, values.email, values.role, values.is_active, path)
         }
 
         toast({
@@ -110,24 +107,6 @@ function AddUserDialog({ open, setOpen, user }: Props) {
                                         <FormControl>
                                             <Input placeholder='email@domain.com' {...field} />
                                         </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name='library_card_no'
-                                render={({ field }) => (
-                                    <FormItem className='grid'>
-                                        <FormLabel>Library card no</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder='e.g. 4545...' {...field} />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Enter the 10 digit library card no.
-                                            
-                                         </FormDescription>
-                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />

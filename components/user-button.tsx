@@ -41,10 +41,23 @@ async function UserButton() {
                         <Link href={'/admin'} className='p-2'>Dashboard</Link>
                     </DropdownMenuItem>
                 }
+
+                {
+                    session?.user && session.user.role === 'author' && 
+                    <DropdownMenuItem>
+                        <Link href={'/author'} className='p-2'>Dashboard</Link>
+                    </DropdownMenuItem>
+                }
                    
                 {
                     session?.user && 
                 <div> 
+
+                    <DropdownMenuItem>
+                        <Link href='/my-account' className='p-2'>My account</Link>
+                    </DropdownMenuItem>
+
+
                     <DropdownMenuItem>
                         <Link href='/profile' className='p-2'>Profile</Link>
                     </DropdownMenuItem>
