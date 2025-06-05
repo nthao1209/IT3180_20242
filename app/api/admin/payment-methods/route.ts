@@ -22,7 +22,7 @@ export async function GET() {
       by: [Prisma.PaymentsScalarFieldEnum.payment_method],
       where: {
         // Lọc loại bỏ các bản ghi payment_method = null
-        payment_method: { not: null },
+        payment_method: { not: undefined },
       },
     })
 
