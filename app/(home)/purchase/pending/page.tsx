@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { verifyPaymentStatus } from '@/actions/actions'
+import { verifyPaymentStatus } from '@/app/actions/actions'
 import { toast } from 'sonner'
 import { Loader2, Copy } from 'lucide-react'
 
@@ -57,7 +57,7 @@ export default function PendingPaymentPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto text-center">
         <h1 className="text-2xl font-bold mb-6">Payment Processing</h1>
-        
+
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
           <h2 className="text-lg font-semibold text-yellow-800 mb-4">
             Your payment is being processed
@@ -101,18 +101,18 @@ export default function PendingPaymentPage() {
               )}
             </Button>
             <Button
-  onClick={checkPaymentStatus}
-  disabled={isChecking}
->
-  {isChecking ? (
-    <>
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      Checking Status...
-    </>
-  ) : (
-    'I Have Completed the Transfer'
-  )}
-</Button>
+              onClick={checkPaymentStatus}
+              disabled={isChecking}
+            >
+              {isChecking ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Checking Status...
+                </>
+              ) : (
+                'I Have Completed the Transfer'
+              )}
+            </Button>
 
             <Button
               variant="outline"

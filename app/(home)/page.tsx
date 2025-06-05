@@ -1,11 +1,11 @@
 import Rating from "@/components/rating";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { prisma } from "@/lib/prisma";
-import { Sidebar } from  "@/components/ui/sidebar";
+import { Sidebar } from "@/components/ui/sidebar";
 import Image from "next/image";
 import Link from "next/link";
-import  {BookAuthorInfo}  from "@/actions/actions";
-import BookCard from "@/components/bookcard"; 
+import { BookAuthorInfo } from "@/app/actions/actions";
+import BookCard from "@/components/bookcard";
 
 
 interface HomePageBook {
@@ -13,13 +13,13 @@ interface HomePageBook {
   cover_image: string | null; // Thêm trường cover_image
   author: BookAuthorInfo | null;
   name: string | null;
-  author_id: number | null; 
+  author_id: number | null;
   book_photos: { url: string }[];
-  
+
 }
 
 interface RecentlyReviewedBook extends HomePageBook {
-  rating: number; 
+  rating: number;
 }
 
 // A simple placeholder component for when images are not available
@@ -31,13 +31,13 @@ const ImagePlaceholder = ({ className }: { className?: string }) => (
     )}
   >
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image-off text-gray-400 dark:text-gray-500 h-10 w-10">
-      <path d="M21.19 21.19L2.81 2.81"/>
-      <path d="M10.29 3.29a2 2 0 0 1 3.42 0l.88.88"/>
-      <path d="M6.28 6.28A2 2 0 0 0 5 8v8a2 2 0 0 0 .29 1.02"/>
-      <path d="M19 12v3.72A2 2 0 0 1 18.71 17"/>
-      <path d="M5 12V8a2 2 0 0 1 2-2h3.72"/>
-      <path d="m2 2 20 20"/>
-      <circle cx="9" cy="9" r="2"/>
+      <path d="M21.19 21.19L2.81 2.81" />
+      <path d="M10.29 3.29a2 2 0 0 1 3.42 0l.88.88" />
+      <path d="M6.28 6.28A2 2 0 0 0 5 8v8a2 2 0 0 0 .29 1.02" />
+      <path d="M19 12v3.72A2 2 0 0 1 18.71 17" />
+      <path d="M5 12V8a2 2 0 0 1 2-2h3.72" />
+      <path d="m2 2 20 20" />
+      <circle cx="9" cy="9" r="2" />
     </svg>
   </div>
 );
@@ -50,57 +50,57 @@ const cn = (...classes: (string | undefined | null | false)[]) => classes.filter
 export default async function HomePage() {
 
   const arrivalsData = await prisma.books.findMany({
-      skip: 0,
-      take: 10,
-      select: { 
-        book_id: true,
-        name: true,
-        author_id: true,
-        cover_image: true,
-        book_photos: {
-          select: { url: true },
-          take: 1,
-        }
-      },
-      orderBy: {
-        created_at: 'desc'
+    skip: 0,
+    take: 10,
+    select: {
+      book_id: true,
+      name: true,
+      author_id: true,
+      cover_image: true,
+      book_photos: {
+        select: { url: true },
+        take: 1,
       }
-    })
-    const arrivals: HomePageBook[] = arrivalsData as HomePageBook[]; 
-  
-  
-  
-    const recentlyReviewedData = await prisma.ratings.findMany({
-      skip: 0,
-      take: 10,
-      distinct: ['book_id'],
-      orderBy: {
-        created_at: 'desc'
-      },
-      select: { 
-        book_id: true,
-        rating: true,
-        books: {
-          select: {
-            book_id: true, 
-            name: true,
-            cover_image: true, 
-            author_id: true,
-            book_photos: { select: { url: true }, take: 1 }
-          }
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  })
+  const arrivals: HomePageBook[] = arrivalsData as HomePageBook[];
+
+
+
+  const recentlyReviewedData = await prisma.ratings.findMany({
+    skip: 0,
+    take: 10,
+    distinct: ['book_id'],
+    orderBy: {
+      created_at: 'desc'
+    },
+    select: {
+      book_id: true,
+      rating: true,
+      books: {
+        select: {
+          book_id: true,
+          name: true,
+          cover_image: true,
+          author_id: true,
+          book_photos: { select: { url: true }, take: 1 }
         }
       }
-    })
-   
-    const recently_reviewed: RecentlyReviewedBook[] = recentlyReviewedData.map(rr => ({
-      author: null ,
-      book_id: rr.books.book_id, 
-      cover_image: rr.books.cover_image, 
-      name: rr.books.name,
-      author_id: rr.books.author_id,
-      book_photos: rr.books.book_photos,
-      rating: rr.rating,
-    }));
+    }
+  })
+
+  const recently_reviewed: RecentlyReviewedBook[] = recentlyReviewedData.map(rr => ({
+    author: null,
+    book_id: rr.books.book_id,
+    cover_image: rr.books.cover_image,
+    name: rr.books.name,
+    author_id: rr.books.author_id,
+    book_photos: rr.books.book_photos,
+    rating: rr.rating,
+  }));
 
   // const staff_picks = await prisma.staff_picks.findMany({ ... }); // Kept as is
 
@@ -112,33 +112,33 @@ export default async function HomePage() {
           for content to align to top after padding */}
       <div className="container mx-auto px-4 py-8 sm:px-8 sm:py-16 flex flex-col space-y-12 sm:space-y-16">
         {/* Reduced padding a bit for better visual, adjust as needed: p-16 -> py-8, px-4 etc. */}
-        
+
         {/* new arrivals */}
-                {arrivals.length > 0 && ( // Thêm kiểm tra arrivals.length
-                  (<section>
-                    <h2 className="text-3xl font-bold mb-6 text-gray-800">New arrivals</h2>
-                    <Carousel
-                      opts={{
-                        slidesToScroll: 'auto',
-                        align: 'start'
-                      }}
-                      className=" w-full "
-                    >
-                      <CarouselContent>
-                        {
-                          arrivals.map(arrival => (
-                            <CarouselItem key={arrival.book_id} className="pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
-                              {/* SỬ DỤNG BOOKCARD */}
-                              <BookCard book={arrival} />
-                            </CarouselItem>
-                          ))
-                        }
-                      </CarouselContent>
-                      <CarouselPrevious />
-                      <CarouselNext />
-                    </Carousel>
-                  </section>)
-                )}
+        {arrivals.length > 0 && ( // Thêm kiểm tra arrivals.length
+          (<section>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">New arrivals</h2>
+            <Carousel
+              opts={{
+                slidesToScroll: 'auto',
+                align: 'start'
+              }}
+              className=" w-full "
+            >
+              <CarouselContent>
+                {
+                  arrivals.map(arrival => (
+                    <CarouselItem key={arrival.book_id} className="pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                      {/* SỬ DỤNG BOOKCARD */}
+                      <BookCard book={arrival} />
+                    </CarouselItem>
+                  ))
+                }
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </section>)
+        )}
 
 
         {/* recently reviewed */}
@@ -161,7 +161,7 @@ export default async function HomePage() {
                         <BookCard book={rr_book} />
                         {/* Hiển thị Rating bên dưới BookCard nếu muốn */}
                         <div className="mt-2 flex justify-center">
-                           <Rating rating={rr_book.rating} />
+                          <Rating rating={rr_book.rating} />
                         </div>
                       </div>
                     </CarouselItem>
@@ -172,9 +172,9 @@ export default async function HomePage() {
               <CarouselNext />
             </Carousel>
           </section>)
-        )}        
-        </div>
+        )}
+      </div>
     </>
   );
 }
-    
+

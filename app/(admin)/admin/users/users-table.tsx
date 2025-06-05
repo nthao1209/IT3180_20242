@@ -5,7 +5,7 @@ import React, { startTransition, useState } from 'react'
 import ConfirmationDialog from '@/components/confirmation-dialog'
 import { usePathname } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { deleteUser } from '@/actions/actions'
+import { deleteUser } from '@/app/actions/actions'
 import { columns, User } from './columns'
 import AddUserDialog from '@/components/add-user-dialog'
 
@@ -36,7 +36,7 @@ function UsersTable({ data }: { data: props }) {
 
         if (itemToAction) {
 
-            startTransition( async () => {
+            startTransition(async () => {
                 await deleteUser(itemToAction.user_id, pathname)
             })
 
@@ -57,7 +57,7 @@ function UsersTable({ data }: { data: props }) {
                 onRowEdit={handleRowEdit}
             />
             <AddUserDialog open={open} setOpen={setOpen} user={itemToAction} />
-            <ConfirmationDialog 
+            <ConfirmationDialog
                 open={openConfirmationDialog}
                 onClose={() => setOpenConfirmationDialog(false)}
                 onConfirm={handleConfirm}

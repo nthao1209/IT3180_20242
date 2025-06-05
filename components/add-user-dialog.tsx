@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils'
 import { Checkbox } from './ui/checkbox'
 import { Button } from './ui/button'
 import { Loader } from 'lucide-react'
-import { addUser, updateUser } from '@/actions/actions'
+import { addUser, updateUser } from '@/app/actions/actions'
 
 type Props = {
     open: boolean,
@@ -51,15 +51,16 @@ function AddUserDialog({ open, setOpen, user }: Props) {
     useEffect(() => {
         if (user) {
             form.setValue('user_id', user.user_id)
-            form.setValue('name',user.name)
-            form.setValue('email',user.email)
-            form.setValue('role',user.role)
-            form.setValue('is_active',user.is_active as boolean)
+            form.setValue('name', user.name)
+            form.setValue('email', user.email)
+            form.setValue('role', user.role)
+            // form.setValue('library_card_no', user.library_card_no)
+            form.setValue('is_active', user.is_active as boolean)
         }
-    },[user, form])
+    }, [user, form])
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        
+
         let message = 'User added'
         setProcessing(true)
         if (user) {

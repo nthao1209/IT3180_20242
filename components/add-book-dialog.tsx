@@ -12,7 +12,7 @@ import { Button } from './ui/button'
 import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown, Loader } from 'lucide-react'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
-import { addBook, addPhoto, deletePhoto, getCategories, requestUpdateBook, requestAddBook } from '@/actions/actions'
+import { addBook, addPhoto, deletePhoto, getCategories, requestUpdateBook, requestAddBook } from '@/app/actions/actions'
 import { toast } from 'sonner'
 import ImageDropzone from './image-dropzone'
 import FileDropzone from './file-dropzone'
@@ -100,11 +100,11 @@ function AddBookDialog({ open, setOpen, book }: props) {
             let message = 'Book added'
 
             if (book) {
-                await requestUpdateBook({...values, path})
+                await requestUpdateBook({ ...values, path })
                 message = 'book updated'
                 setOpen(false)
             } else {
-                await addBook({...values, path})
+                await addBook({ ...values, path })
                 await requestAddBook({ ...values, path })
             }
 
@@ -220,7 +220,7 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                     </FormItem>
                                 )}
                             />
-                           
+
                             <FormField
                                 control={form.control}
                                 name="file_path"
@@ -245,9 +245,9 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                     <FormItem>
                                         <FormLabel>Price</FormLabel>
                                         <FormControl>
-                                            <Input 
+                                            <Input
                                                 type="number"
-                                                placeholder='price' 
+                                                placeholder='price'
                                                 {...field}
                                                 onChange={e => field.onChange(Number(e.target.value))}
                                             />
@@ -263,9 +263,9 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                     <FormItem>
                                         <FormLabel>Published Date</FormLabel>
                                         <FormControl>
-                                            <Input 
+                                            <Input
                                                 type="number"
-                                                placeholder='published date' 
+                                                placeholder='published date'
                                                 {...field}
                                                 onChange={e => field.onChange(Number(e.target.value))}
                                             />

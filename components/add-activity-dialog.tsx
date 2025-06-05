@@ -13,7 +13,7 @@ import { Textarea } from './ui/textarea'
 import DateSelect from './date-select'
 import TimeSelect from './time-select'
 import ImageDropzone from './image-dropzone'
-import { addActivity, updateActivity } from '@/actions/actions'
+import { addActivity, updateActivity } from '@/app/actions/actions'
 import { Loader } from 'lucide-react'
 
 type Props = {
@@ -74,11 +74,11 @@ function AddActivityDialog({ setOpen, open, activity }: Props) {
             let message = 'Activity has been saved'
             setProcessing(true)
             if (activity) {
-                await updateActivity({...values, path })
+                await updateActivity({ ...values, path })
                 message = "activity updated"
                 setOpen(false)
             } else {
-                await addActivity({...values, path})
+                await addActivity({ ...values, path })
             }
 
             toast({

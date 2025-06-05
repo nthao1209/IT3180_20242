@@ -21,7 +21,7 @@ export default function RequestDetailDialog({ open, setOpen, request }: Props) {
         <div className='space-y-2'>
           <p><strong>Book title:</strong> {request.book_title}</p>
           <p><strong>Author:</strong> {request.author_name}</p>
-          <p><strong>Request:</strong> {request.type}</p>
+          <p><strong>Request:</strong> {request.action}</p>
           <p><strong>Date:</strong> {request.created_at}</p>
           <p><strong>Status:</strong> {request.status}</p>
         </div>

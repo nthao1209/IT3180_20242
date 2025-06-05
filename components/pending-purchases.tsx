@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useEffect, useState } from 'react'
-import { getPendingPurchases } from '@/actions/actions'
+import { getPendingPurchases } from '@/app/actions/actions'
 import BookCard from './bookcard'
 
 export default function PendingPurchases() {

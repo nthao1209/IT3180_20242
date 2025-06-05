@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 // Giả sử Server Action của bạn tên là handleSearchBarSearch và nằm trong actions/actions.ts
-import { handleSearchBarSearch } from '@/actions/actions'; 
+import { handleSearchBarSearch } from '@/app/actions/actions';
 
 function SearchBar() {
   return (
@@ -16,7 +16,7 @@ function SearchBar() {
         <Select name='search_by' defaultValue='all'> {/* Đặt giá trị mặc định là 'all' */}
           <SelectTrigger className='w-full lg:w-[480px]'>
             {/* Placeholder có thể là "All" hoặc "Keyword" */}
-            <SelectValue placeholder="All Fields" /> 
+            <SelectValue placeholder="All Fields" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>All Fields</SelectItem> {/* Tiêu chí tìm kiếm chung */}

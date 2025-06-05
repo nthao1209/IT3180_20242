@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import BankPayment from '@/components/bank-payment-form'
-import { processCheckout } from '@/actions/actions'
+import { processCheckout } from '@/app/actions/actions'
 
 export default function CartPage() {
   const { cart, removeFromCart, getTotalPrice, clearCart } = useCart()

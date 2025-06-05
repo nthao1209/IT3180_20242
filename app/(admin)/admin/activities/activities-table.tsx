@@ -5,7 +5,7 @@ import React, { startTransition, useState } from 'react'
 import ConfirmationDialog from '@/components/confirmation-dialog'
 import { usePathname } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { deleteActivity } from '@/actions/actions'
+import { deleteActivity } from '@/app/actions/actions'
 import { Activity, columns } from './columns'
 import AddActivityDialog from '@/components/add-activity-dialog'
 

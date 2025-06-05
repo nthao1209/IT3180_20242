@@ -11,8 +11,8 @@ import { useSession } from 'next-auth/react'; // Bỏ signIn nếu không tự �
 import {
   loadBookForReading,
   saveReadingProgress,
-  type ReadingSessionDataForClient, 
-} from '@/actions/actions';
+  type ReadingSessionDataForClient,
+} from '@/app/actions/actions';
 
 // (Tùy chọn) Style cho ReactReader
 const readerStyles: IReactReaderStyle = {
@@ -40,7 +40,7 @@ export default function ReadBookPage() {
   const [sessionData, setSessionData] = useState<ReadingSessionDataForClient | null>(null);
   const [epubUrl, setEpubUrl] = useState<string | null>(null);
   const [initialLocation, setInitialLocation] = useState<string | null>(null);
-  
+
   const [isLoadingBook, setIsLoadingBook] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,7 +80,7 @@ export default function ReadBookPage() {
           setInitialLocation(result.data.last_location);
           currentLocationRef.current = result.data.last_location;
         } else {
-            setError("Could not load book data."); // Trường hợp data không có nhưng cũng không có error
+          setError("Could not load book data."); // Trường hợp data không có nhưng cũng không có error
         }
         setIsLoadingBook(false);
       }
@@ -179,9 +179,9 @@ export default function ReadBookPage() {
               <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
             </div>
           }
-          // styles={readerStyles} // Bỏ comment nếu muốn dùng style tùy chỉnh
-          // epubOptions cho phép tùy chỉnh sâu hơn epub.js
-          // tocChanged={(toc) => console.log(toc)} // Lấy mục lục nếu cần
+        // styles={readerStyles} // Bỏ comment nếu muốn dùng style tùy chỉnh
+        // epubOptions cho phép tùy chỉnh sâu hơn epub.js
+        // tocChanged={(toc) => console.log(toc)} // Lấy mục lục nếu cần
         />
       </main>
     </div>
