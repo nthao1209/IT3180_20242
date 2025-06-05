@@ -1,7 +1,7 @@
 import BackButton from '@/components/back-button'
 import CommentBox from '@/components/comment-box'
 import CommentCard from '@/components/comment-card'
-import Rating from '@/components/rating'
+import Rating from '@/components/rating' 
 import { Separator } from '@/components/ui/separator'
 import { prisma } from '@/lib/prisma'
 import { BookOpen } from 'lucide-react'
@@ -12,6 +12,7 @@ import React from 'react'
 import LikeButton from '@/components/like-button'
 import PurchaseButton from '@/components/purchase-button'
 import { notFound } from 'next/navigation'
+import CommentListWrapper from '@/components/CommentListWrapper'
 
 type BookCategoryLink = {
   category_id: number;
@@ -178,7 +179,7 @@ export default async function BookPage({ params }: { params: { book_id: string }
         <h2 className='text-xl font-bold mb-3'>Bình luận</h2>
         {session?.user ? (
           <div>
-            {String(bookId)}
+            <CommentListWrapper bookId={bookId} />
           </div>
         ) : (
           <p className='font-bold border rounded-sm p-4'>
