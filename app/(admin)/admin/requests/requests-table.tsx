@@ -1,23 +1,27 @@
+// app/(admin)/admin/requests/requests-table.tsx
 'use client'
 
 import React, { startTransition, useState } from 'react'
-import { columns, Request } from './columns'
+import type { Request } from './type'
+import { columns } from './columns'
 import { DataTable } from '@/components/data-table'
 import { usePathname } from 'next/navigation'
 import ConfirmationDialog from '@/components/confirmation-dialog'
 import { useToast } from '@/hooks/use-toast'
-import { approveBookRequestAction, rejectBookRequestAction } from '@/actions/actions'
+import { approveBookRequest, rejectBookRequest } from '@/app/actions/actions'
 import RequestDetailDialog from './requestDialogy'
 
 type Props = {
-  data: Request[],
-  total: number
+  data: {
+    data: Request[]
+    total: number
+  }
 }
 
-function RequestsTable({ data }: { data: Props }) {
+function RequestsTable({ data }: Props) {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
   const [actionType, setActionType] = useState<'approve' | 'reject'>()
-  const [selectedRequest, setSelectedRequest] = useState<Request>()
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null)
   const [openDetailDialog, setOpenDetailDialog] = useState(false)
 
   const pathname = usePathname()
@@ -45,12 +49,25 @@ function RequestsTable({ data }: { data: Props }) {
     setOpenConfirmDialog(false)
 
     startTransition(async () => {
-      if (actionType === 'approve') {
-        await approveBookRequestAction(selectedRequest.id, pathname)
-        toast({ description: `The request for "${selectedRequest.book_title}" has been approved.` })
-      } else {
-        await rejectBookRequestAction(selectedRequest.id, pathname)
-        toast({ description: `The request for "${selectedRequest.book_title}" has been rejected.` })
+      try {
+        if (actionType === 'approve') {
+          await approveBookRequest(selectedRequest.id, pathname)
+          toast({
+            description: `The request for "${selectedRequest.book_title}" has been approved.`,
+          })
+        } else {
+          await rejectBookRequest(selectedRequest.id, pathname)
+          toast({
+            description: `The request for "${selectedRequest.book_title}" has been rejected.`,
+          })
+        }
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Something went wrong'
+        console.error(error)
+        toast({
+          variant: 'destructive',
+          description: message,
+        })
       }
     })
   }
@@ -58,23 +75,25 @@ function RequestsTable({ data }: { data: Props }) {
   return (
     <>
       <DataTable
-        columns={columns({ 
-          onApproveAction: handleApprove, 
-          onRejectAction: handleReject, 
-          onViewAction: handleViewDetail 
+        columns={columns({
+          onApproveAction: handleApprove,
+          onRejectAction: handleReject,
+          onViewAction: handleViewDetail,
         })}
         data={data.data}
         total={data.total}
-        filter_column='book_title'
+        filter_column="book_title"
         onRowDelete={() => {}}
         onRowEdit={() => {}}
       />
 
-      <RequestDetailDialog
-        open={openDetailDialog}
-        setOpen={setOpenDetailDialog}
-        request={selectedRequest}
-      />
+      {selectedRequest && (
+        <RequestDetailDialog
+          open={openDetailDialog}
+          setOpen={setOpenDetailDialog}
+          request={selectedRequest}
+        />
+      )}
 
       <ConfirmationDialog
         open={openConfirmDialog}

@@ -1,29 +1,25 @@
 // app/(home)/layout.tsx
-import Footer from '@/components/footer';
-import Header from '@/components/header';
-import Navbar from '@/components/navbar';
-import { CartProvider } from '@/contexts/cart-context';
-import { Session } from 'inspector/promises';
-import { SessionProvider } from 'next-auth/react';
-import { Toaster } from 'sonner';
-import React from 'react';
 
-export default function HomeLayout({ children }: {
-    children: React.ReactNode
-}) {
+import Footer from "@/components/footer";
+import Header from "@/components/header";
+import Navbar from "@/components/navbar";
+import { CartProvider } from "@/contexts/cart-context";
+import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
+import React from "react";
+
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-    <CartProvider>
-       <div className="flex flex-col min-h-full"> {/* min-h-full để cố gắng chiếm chiều cao của SidebarInset */}
-        <Header/>
-        <Navbar/>
-        <main className="flex-grow"> {/* Cho phép main content của HomeLayout co giãn */}
-            {children} {/* HomePage sẽ được render ở đây */}
-        </main>
-        <Footer/>
-        <Toaster position="top-right" />
-       </div>
-    </CartProvider>
-  </SessionProvider>
+      <CartProvider>
+        <div className="flex flex-col min-h-full">
+          <Header />
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+          <Toaster position="top-right" />
+        </div>
+      </CartProvider>
+    </SessionProvider>
   );
 }

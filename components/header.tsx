@@ -1,35 +1,31 @@
-import React from 'react'
-import Logo from './logo'
-import SearchBar from './search-bar'
-import { SidebarTrigger } from './ui/sidebar'
+// app/(home)/components/header.tsx
+
+"use client";
+
+import React from "react";
+import Logo from "./logo";
+import SearchBar from "./search-bar";
 
 function Header() {
   return (
     <>
-      <header className='py-2 lg:py-4 container mx-auto '>
-        {/* mobile */}
+      <header className="py-2 lg:py-4 container mx-auto">
+        {/* Mobile */}
         <div className="flex sm:hidden flex-col justify-between p-2">
           <div className="flex items-center">
-            {/* logo */}
             <Logo />
-            {/* sidebar trigger */}
-            {/* <SidebarTrigger className='flex md:hidden ml-2'/> */}
           </div>
-
           <SearchBar />
         </div>
 
-        {/* desktop */}
+        {/* Desktop */}
         <div className="hidden sm:flex items-center justify-between">
-
-          {/* logo */}
           <Logo />
-
           <SearchBar />
         </div>
       </header>
     </>
-  )
+  );
 }
 
-export default Header
+export default Header;

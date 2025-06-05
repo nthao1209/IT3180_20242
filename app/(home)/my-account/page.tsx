@@ -8,7 +8,7 @@ import RecentlyReviewed from '@/components/recently-reviewed'
 import { prisma } from '@/lib/prisma'
 import BookCard from '@/components/bookcard'
 import PendingPurchases from '@/components/pending-purchases'
-import { getPendingPurchases } from '@/actions/actions'
+import { getPendingPurchases } from '@/app/actions/actions'
 
 
 
@@ -63,9 +63,9 @@ async function AccountPage() {
                     <MyLibrary />
                 </TabsContent>
                 <TabsContent value='pending-purchases'>
-  <PendingPurchases />
-</TabsContent>
-               {/* <TabsContent value='purchase-history'>
+                    <PendingPurchases />
+                </TabsContent>
+                {/* <TabsContent value='purchase-history'>
                     <PurchaseHistory />
                 </TabsContent> */}
                 <TabsContent value='recently-reviewed'>
@@ -74,18 +74,18 @@ async function AccountPage() {
                 <TabsContent value='liked-books'>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         {favorites.map((favorite) => (
-                            <BookCard 
-                                key={favorite.book_id} 
+                            <BookCard
+                                key={favorite.book_id}
                                 book={{
                                     ...favorite.book,
                                     author: favorite.book.users
-                                }} 
+                                }}
                             />
                         ))}
                     </div>
                 </TabsContent>
                 <TabsContent value='cart'>
-                    <CartPage/>
+                    <CartPage />
                 </TabsContent>
             </Tabs>
         </div>

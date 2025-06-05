@@ -1,6 +1,6 @@
 'use client'
 
-import { State, updateProfile } from '@/actions/actions'
+import { State, updateProfile } from '@/app/actions/actions'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -41,13 +41,13 @@ function ProfileForm({ user }: Props) {
   const [showPassword, setShowPassword] = useState(false)
 
   const formatDate = (date: Date | undefined | null): string => {
-  if (!date) return ''
-  const d = new Date(date)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+    if (!date) return ''
+    const d = new Date(date)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
 
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -65,16 +65,16 @@ function ProfileForm({ user }: Props) {
   })
 
   useEffect(() => {
-  if (state?.message?.includes('Cập nhật') && !state?.requireSignOut) {
-    form.reset()
-    // Bắt reload lại trang để lấy session mới nhất từ server
-    window.location.reload()
-  }
+    if (state?.message?.includes('Cập nhật') && !state?.requireSignOut) {
+      form.reset()
+      // Bắt reload lại trang để lấy session mới nhất từ server
+      window.location.reload()
+    }
 
-  if (state?.requireSignOut) {
-    window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent('/')}&message=${encodeURIComponent(state.message ?? '')}`
-  }
-}, [state, form])
+    if (state?.requireSignOut) {
+      window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent('/')}&message=${encodeURIComponent(state.message ?? '')}`
+    }
+  }, [state, form])
 
 
   return (
@@ -118,13 +118,13 @@ function ProfileForm({ user }: Props) {
             </FormControl>
           </FormItem>
         )} />
-        
+
 
         {/* Mật khẩu */}
         <FormField name="old_password" control={form.control} render={({ field }) => (
           <FormItem className="relative">
             <FormLabel>Mật khẩu cũ</FormLabel>
-             <Button
+            <Button
               type="button"
               variant="ghost"
               size="icon"
@@ -141,7 +141,7 @@ function ProfileForm({ user }: Props) {
         <FormField name="new_password" control={form.control} render={({ field }) => (
           <FormItem className="relative">
             <FormLabel>Mật khẩu mới</FormLabel>
-             <Button
+            <Button
               type="button"
               variant="ghost"
               size="icon"

@@ -3,7 +3,7 @@
 
 import { useState, FormEvent, useEffect, useCallback } from 'react'; // Thêm useCallback    
 // Đảm bảo searchBooks và BookSearchResult được import đúng
-import { searchBooks, type PaginatedBookSearchResult, type BookSearchResult } from '@/actions/actions'; // Import kiểu mới
+import { searchBooks, type PaginatedBookSearchResult, type BookSearchResult } from '@/app/actions/actions'; // Import kiểu mới
 import { useSearchParams, useRouter } from 'next/navigation';
 import BookCard from '@/components/bookcard';
 import PaginationControls from '@/components/PaginationControls'; // IMPORT PaginationControls
@@ -24,7 +24,7 @@ export default function SearchPage() {
     const [query, setQuery] = useState(initialQuery);
     const [criteria, setCriteria] = useState<BookSearchCriteria>(initialCriteria);
     const [currentPage, setCurrentPage] = useState(initialPage); // State cho trang hiện tại
-    
+
     const [results, setResults] = useState<BookSearchResult[]>([]);
     const [totalPages, setTotalPages] = useState(0); // State cho tổng số trang
     const [totalResults, setTotalResults] = useState(0); // State cho tổng số kết quả (tùy chọn)
@@ -90,7 +90,7 @@ export default function SearchPage() {
             params.set('q', query.trim());
             params.set('crit', criteria);
             // Khi submit form, luôn tìm từ trang 1
-            params.set('page', '1'); 
+            params.set('page', '1');
             router.push(`/search?${params.toString()}`);
         } else {
             // Nếu query rỗng, có thể redirect về /search không có params
@@ -145,9 +145,9 @@ export default function SearchPage() {
                     <p className="text-md text-gray-400 mt-2">Vui lòng thử lại với từ khóa hoặc tiêu chí khác.</p>
                 </div>
             )}
-            
+
             {!isLoading && !hasSearched && query.trim() === '' && (
-                 <div className="text-center py-10">
+                <div className="text-center py-10">
                     <p className="text-xl text-gray-500">Nhập từ khóa để bắt đầu tìm kiếm.</p>
                 </div>
             )}
@@ -161,10 +161,10 @@ export default function SearchPage() {
                         </p>
                         <p className="text-sm text-blue-700">
                             Theo tiêu chí: <strong className="font-semibold">
-                                {criteria === 'all' ? 'Từ khóa chung' : 
-                                 criteria === 'name' ? 'Tên sách' :
-                                 criteria === 'author' ? 'Tác giả' :
-                                 criteria === 'description' ? 'Mô tả' : criteria}
+                                {criteria === 'all' ? 'Từ khóa chung' :
+                                    criteria === 'name' ? 'Tên sách' :
+                                        criteria === 'author' ? 'Tác giả' :
+                                            criteria === 'description' ? 'Mô tả' : criteria}
                             </strong> (Trang {currentPage} / {totalPages})
                         </p>
                     </div>
@@ -178,7 +178,7 @@ export default function SearchPage() {
                         <PaginationControls
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            // basePath="/search" // Không cần nếu PaginationControls tự lấy pathname
+                        // basePath="/search" // Không cần nếu PaginationControls tự lấy pathname
                         />
                     )}
                 </div>

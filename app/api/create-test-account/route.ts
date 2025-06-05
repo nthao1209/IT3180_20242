@@ -1,13 +1,13 @@
-import { createTestAccount } from '@/actions/actions';
+import { createTestAccount } from '@/app/actions/actions';
 import { NextResponse } from 'next/server';
 
 // Handle GET requests
 export async function GET() {
     try {
         const result = await createTestAccount();
-        
+
         if (result.success) {
-            return NextResponse.json({ 
+            return NextResponse.json({
                 message: 'Test account created successfully',
                 user: {
                     email: 'test@example.com',
@@ -15,15 +15,15 @@ export async function GET() {
                 }
             });
         } else {
-            return NextResponse.json({ 
+            return NextResponse.json({
                 message: 'Failed to create test account',
-                error: result.error 
+                error: result.error
             }, { status: 500 });
         }
     } catch (error) {
-        return NextResponse.json({ 
+        return NextResponse.json({
             message: 'Error creating test account',
-            error 
+            error
         }, { status: 500 });
     }
 }
@@ -32,9 +32,9 @@ export async function GET() {
 export async function POST() {
     try {
         const result = await createTestAccount();
-        
+
         if (result.success) {
-            return NextResponse.json({ 
+            return NextResponse.json({
                 message: 'Test account created successfully',
                 user: {
                     email: 'test@example.com',
@@ -42,15 +42,15 @@ export async function POST() {
                 }
             });
         } else {
-            return NextResponse.json({ 
+            return NextResponse.json({
                 message: 'Failed to create test account',
-                error: result.error 
+                error: result.error
             }, { status: 500 });
         }
     } catch (error) {
-        return NextResponse.json({ 
+        return NextResponse.json({
             message: 'Error creating test account',
-            error 
+            error
         }, { status: 500 });
     }
 } 

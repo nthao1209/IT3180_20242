@@ -6,7 +6,7 @@ import { Category, columns } from './columns'
 import ConfirmationDialog from '@/components/confirmation-dialog'
 import { usePathname } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { deleteCategory } from '@/actions/actions'
+import { deleteCategory } from '@/app/actions/actions'
 import AddCategoryDialog from '@/components/add-category-dialog'
 
 type props = {
@@ -39,7 +39,7 @@ function CategoriesTable({ data }: { data: props }) {
 
         if (itemToAction) {
 
-            startTransition( async () => {
+            startTransition(async () => {
                 await deleteCategory(itemToAction.category_id, pathname)
             })
 
@@ -60,7 +60,7 @@ function CategoriesTable({ data }: { data: props }) {
                 onRowEdit={handleRowEdit}
             />
             <AddCategoryDialog open={open} setOpen={setOpen} category={itemToAction} />
-            <ConfirmationDialog 
+            <ConfirmationDialog
                 open={openConfirmationDialog}
                 onClose={() => setOpenConfirmationDialog(false)}
                 onConfirm={handleConfirm}

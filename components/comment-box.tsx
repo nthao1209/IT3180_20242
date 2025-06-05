@@ -2,7 +2,7 @@
 
 import React, { useActionState, useState } from 'react'
 import Rating from './rating'
-import { addRating, State } from '@/actions/actions'
+import { addRating, State } from '@/app/actions/actions'
 import { Button } from './ui/button'
 
 type CommentBoxState = { message: string }

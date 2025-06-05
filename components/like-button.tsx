@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Heart } from 'lucide-react'
-import { likeBook, unlikeBook } from '@/actions/actions'
+import { likeBook, unlikeBook } from '@/app/actions/actions'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -47,9 +47,8 @@ export default function LikeButton({ bookId, initialLiked }: LikeButtonProps) {
       size="sm"
       onClick={handleLike}
       disabled={isLoading}
-      className={`flex items-center gap-2 ${
-        isLiked ? 'text-red-500 border-red-500 hover:bg-red-50' : ''
-      }`}
+      className={`flex items-center gap-2 ${isLiked ? 'text-red-500 border-red-500 hover:bg-red-50' : ''
+        }`}
     >
       <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500' : ''}`} />
       {isLiked ? 'Favorited' : 'Add to Favorites'}

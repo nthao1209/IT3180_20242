@@ -5,7 +5,7 @@ import { Book, columns } from './columns'
 import { DataTable } from '@/components/data-table'
 import { usePathname } from 'next/navigation'
 import ConfirmationDialog from '@/components/confirmation-dialog'
- import { deleteBook } from '@/actions/actions'
+import { deleteBook } from '@/app/actions/actions'
 import { toast } from 'sonner'
 import AddBookDialog from '@/components/add-book-dialog'
 
@@ -41,7 +41,7 @@ function CatalogTable({ data, total }: props) {
         await deleteBook(itemToAction.book_id, pathname)
       })
 
-      toast( `${itemToAction.name} deleted`)
+      toast(`${itemToAction.name} deleted`)
     }
   }
   return (
@@ -54,7 +54,7 @@ function CatalogTable({ data, total }: props) {
         onRowDelete={handleRowDelete}
         onRowEdit={handleRowEdit}
       />
-      <AddBookDialog open={open} setOpen={setOpen} book={itemToAction}   />
+      <AddBookDialog open={open} setOpen={setOpen} book={itemToAction} />
       <ConfirmationDialog
         open={openConfirmationDialog}
         onClose={() => setOpenConfirmationDialog(false)}

@@ -5,7 +5,7 @@ import { Book, columns } from './columns'
 import { DataTable } from '@/components/data-table'
 import { usePathname } from 'next/navigation'
 import ConfirmationDialog from '@/components/confirmation-dialog'
-import { deleteBook } from '@/actions/actions'
+import { deleteBook } from '@/app/actions/actions'
 import { useToast } from '@/hooks/use-toast'
 import AddBookDialog from '@/components/add-book-dialog'
 

@@ -6,7 +6,7 @@ import {
   requestAddBook,
   requestUpdateBook,
   requestDeleteBook,
-} from "@/actions/actions";
+} from "@/app/actions/actions";
 
 async function AuthorPage({
   searchParams,
