@@ -11,11 +11,11 @@ import BookCard from "@/components/bookcard";
 interface HomePageBook {
   book_id: number;
   cover_image: string | null; // Thêm trường cover_image
-  users: BookAuthorInfo | null;
+  author: BookAuthorInfo | null;
   name: string | null;
   author_id: number | null; 
   book_photos: { url: string }[];
-  author_name: string | null;
+  
 }
 
 interface RecentlyReviewedBook extends HomePageBook {
@@ -52,28 +52,38 @@ export default async function HomePage() {
   const arrivalsData = await prisma.books.findMany({
       skip: 0,
       take: 10,
+      where:{
+        state: true
+      },
       select: { 
         book_id: true,
         name: true,
         author_id: true,
         cover_image: true,
-        author_name: true,
         book_photos: {
           select: { url: true },
           take: 1,
         },
-        users:{
-          select:{
+        users: { // Lấy thông tin tác giả
+          select: { 
+            name: true,
             user_id: true,
-            name: true
-          }
-        }
+      }
+    }
+        
       },
       orderBy: {
         created_at: 'desc'
       }
     })
-    const arrivals: HomePageBook[] = arrivalsData as HomePageBook[]; 
+    const arrivals: HomePageBook[] = arrivalsData.map(book => ({
+      book_id: book.book_id,
+      name: book.name,
+      author_id: book.author_id,
+      cover_image: book.cover_image,
+      book_photos: book.book_photos,
+      author: book.users ? { name: book.users.name, user_id: book.users.user_id } : null,
+    })); 
   
   
   
@@ -93,14 +103,15 @@ export default async function HomePage() {
             name: true,
             cover_image: true, 
             author_id: true,
-            book_photos: { select: { url: true }, take: 1 }
+            book_photos: { select: { url: true }, take: 1 },
+            users: { select: { name: true, user_id: true } }
           }
         }
       }
     })
    
     const recently_reviewed: RecentlyReviewedBook[] = recentlyReviewedData.map(rr => ({
-      author: null ,
+      author: rr.books.users ? { name: rr.books.users.name, user_id: rr.books.users.user_id } : null,
       book_id: rr.books.book_id, 
       cover_image: rr.books.cover_image, 
       name: rr.books.name,

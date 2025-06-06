@@ -59,7 +59,7 @@ export default function BookCard({ book }: BookCardProps) {
             </h3>
             <p 
               className="text-xs text-gray-500 mt-1 truncate" 
-              title={book.author_name || ""} // SỬA Ở ĐÂY: Truy cập book.author.name
+              title={book.author_name || ""} 
             >
               {book.author_name || "Unknown Author"} {/* SỬA Ở ĐÂY */}
             </p>

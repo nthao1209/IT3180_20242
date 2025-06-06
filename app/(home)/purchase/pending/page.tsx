@@ -25,10 +25,10 @@ export default function PendingPaymentPage() {
       if (result.success) {
         if (result.status === 'completed') {
           toast.success('Payment confirmed! Your books are now available in your library.')
-          router.push('/library')
+          router.push('/my-account')
         } else if (result.status === 'no_pending_payments') {
           toast.info('No pending payments found')
-          router.push('/library')
+          router.push('/my-account')
         } else {
           toast.info('Payment is still being processed. Please wait.')
         }

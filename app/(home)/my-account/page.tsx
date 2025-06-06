@@ -51,7 +51,7 @@ async function AccountPage() {
                 <TabsList>
                     <TabsTrigger value='my-library'>My Library</TabsTrigger>
                     {/* <TabsTrigger value='purchase-history'>Purchase History</TabsTrigger> */}
-                    <TabsTrigger value='recently-reviewed'>Recently Reviewed</TabsTrigger>
+                    {/* <TabsTrigger value='recently-reviewed'>Recently Reviewed</TabsTrigger> */}
                     <TabsTrigger value='liked-books'>Liked Books</TabsTrigger>
                     <TabsTrigger value='cart'>Cart</TabsTrigger>
 

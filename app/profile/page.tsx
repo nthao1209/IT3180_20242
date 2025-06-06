@@ -23,7 +23,7 @@ async function ProfilePage() {
       <BackButton />
       <h1 className="text-2xl font-bold mb-4">Hồ sơ cá nhân</h1>
 
-      {session?.user.role === 'member' && user_details && (
+      {session && user_details && (
         <ProfileForm user={{ 
           ...user_details, 
           date_of_birth: user_details.date_of_birth.toISOString(), 

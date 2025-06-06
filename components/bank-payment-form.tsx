@@ -171,9 +171,11 @@ export default function BankPayment({ totalAmount, onPaymentSubmit }: BankPaymen
             className="w-full mt-4"
             onClick={() => {
               // Navigate to the pending-purchases page
-              //router.push('/pending-purchases')
+            //   router.push('/pending-purchases')
               router.push(`/purchase/pending?ref=${encodeURIComponent(referenceNumber)}`)
+              
 
+              //E:\IT3180\IT3180_20242\it3180_20242\components\my-library.tsx
             }}
           >
             Completed Payment

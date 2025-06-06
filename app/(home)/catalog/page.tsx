@@ -29,7 +29,7 @@ interface PaginatedCatalogResult {
   totalPages: number;
 }
 
-const ITEMS_PER_PAGE = 2; // Số lượng sách trên mỗi trang, bạn có thể thay đổi
+const ITEMS_PER_PAGE = 5; // Số lượng sách trên mỗi trang, bạn có thể thay đổi
 
 export async function getPaginatedCatalogBooks(
   page: number = 1 // Mặc định là trang 1
@@ -39,6 +39,9 @@ export async function getPaginatedCatalogBooks(
 
     const [books, totalBooks] = await prisma.$transaction([
       prisma.books.findMany({
+        where: {
+          state: true, // Chỉ lấy sách có trạng thái 'active'
+        },
         select: {
           book_id: true,
           name: true,

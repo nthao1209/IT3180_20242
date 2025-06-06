@@ -3,7 +3,7 @@ import React from 'react'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'
 import { Library } from 'lucide-react'
 import Link from 'next/link'
-
+import UserButton from './user-button' // Giả sử bạn đã có component UserButton
 const menu_items = [
     {   title: 'Catalog',
         url: '/author',
@@ -39,7 +39,7 @@ const menu_items = [
                     <SidebarFooter>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                {/* <UserButton /> */}
+                                <UserButton />
                             </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarFooter>

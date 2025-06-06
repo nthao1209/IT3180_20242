@@ -820,15 +820,14 @@ export async function processCheckout(
                 }))
             })
 
-            // Add books to user's library (will be confirmed after payment verification)
             await tx.user_books.createMany({
-                data: books.map((book: { book_id: number }) => ({
+                data: books.map((book: { book_id: number }) => ({       
                     user_id: Number(session.user.id),
                     book_id: book.book_id,
                     status: 'pending_payment'
-                }))
-            })
+                })) 
         })
+    })
 
         return { 
             success: true, 
@@ -889,28 +888,12 @@ export async function verifyPaymentStatus() {
                     },
                     data: {
                         status: 'completed',
-                        completed_at: new Date()
+                        paid_at: new Date()
                     }
-                })
-
-                // Update user_books status
-                await tx.user_books.updateMany({
-                    where: {
-                        user_id: Number(session.user.id),
-                        status: 'pending_payment',
-                        book_id: {
-                            in: verifiedPayments.flatMap(p => 
-                                p.payment_books.map(pb => pb.book_id)
-                            )
-                        }
-                    },
-                    data: {
-                        status: 'active'
-                    }
-                })
+                })                // Update paymentbook status
             })
 
-            // TODO: Send email notification
+            
             return { success: true, status: 'completed' }
         }
 
@@ -984,21 +967,24 @@ export async function getPendingPurchases() {
                 user_id: userId,
                 status: 'pending_payment'
             },
-            include: {
-                books: {
-                    include: {
-                        users: true,
-                        book_photos: true
-                    }
-                }
-            }
-        })
+                    select: {
+                        book: { 
+                            select: {
+                                author_name: true, // Để lấy thông tin tác giả (author)
+                                book_photos: true,
+                                name: true
+                            },
+                        },
+                    },
+
+        });
+
 
         return {
             success: true,
             books: pending.map(entry => ({
-                ...entry.books,
-                author: entry.books.users
+                ...entry.book,
+                author: entry.book.author_name
             }))
         }
     } catch (error) {
@@ -1522,10 +1508,55 @@ export async function approveBookRequestAction(requestId: number, path: string) 
 
 export async function rejectBookRequestAction(requestId: number, path: string) {
     try {
-        await prisma.book_requests.update({
+        const request = await prisma.book_requests.findUnique({
             where: { request_id: requestId },
-            data: { status: 'rejected' }
+            include: { books: true }
         });
+
+        if ( request?.action === 'add' && request.book_id){
+            await prisma.books.delete({
+                where: {
+                    book_id: request.book_id
+                }
+            });
+            await prisma.book_requests.delete({
+                where: {
+                    request_id: requestId
+                }
+            });
+
+        }
+        else if( request?.action === 'delete' && request.book_id){
+            await tx.books.update({
+                where: {
+                    book_id: request.book_id
+                },
+                data: {
+                    state: true
+                }
+            });
+            await prisma.book_requests.delete({
+                where: {
+                    request_id: requestId
+                }
+            });
+        }
+
+        else{
+            await tx.books.update({
+                where: {
+                    book_id: request.book_id
+                },
+                data: {
+                    state: true
+                }
+            });
+            await prisma.book_requests.update({
+                where: { request_id: requestId },
+                data: { status: 'rejected' }
+            });
+        }
+    
 
         revalidatePath(path);
         return { success: true };

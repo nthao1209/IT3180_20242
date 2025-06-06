@@ -2,7 +2,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { getPendingPurchases } from '@/actions/actions'
-import BookCard from './bookcard'
+import BookCard from './bookcard'     //kh sd bookcard ma phai tim cai khac////
 
 export default function PendingPurchases() {
   // ← Tell TS “this is just an array of anything,” so it won’t infer `never[]`.
@@ -11,9 +11,10 @@ export default function PendingPurchases() {
   useEffect(() => {
     const fetchPending = async () => {
       const result = await getPendingPurchases()
+      console.log('Pending purchases result:', result)
 
       if (result.success && Array.isArray(result.books)) {
-        // We’re asserting that result.books is at least an array of things.
+        //result.books is at least an array of things
         setPendingBooks(result.books as any[])
       } else {
         setPendingBooks([])
@@ -22,6 +23,7 @@ export default function PendingPurchases() {
     fetchPending()
   }, [])
 
+  //////////
   if (pendingBooks.length === 0) {
     return <p className="text-gray-600">No pending purchases.</p>
   }
