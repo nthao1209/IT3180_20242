@@ -10,10 +10,13 @@ export async function GET() {
         status: 'pending'
       },
       select: {
-        pay_id: true,
+        id: true,
+        book_id: true,
         user_id: true
       }
     })
+
+    console.log("pending:", pending)
 
     return NextResponse.json(pending)
   } catch (error) {

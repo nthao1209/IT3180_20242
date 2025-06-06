@@ -10,7 +10,9 @@ export default function AdminPurchasesPage() {
     useEffect(() => {
         const fetchPayments = async () => {
             const res = await axios.get("/api/pending-payment")
+            console.log("Kết quả từ API /api/pending-payment:", res.data) // Thêm dòng này
             setPayments(res.data)
+            
         }
         fetchPayments()
     }, [])

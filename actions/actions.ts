@@ -964,13 +964,14 @@ export async function confirmPaymentByPayId(payId: number) {
             // Cập nhật tất cả sách đang chờ thanh toán thành active sau khi xác nhận
             await prisma.user_books.updateMany({
                 where: {
-                    pay_id: payId,
+                    id: Number(payId),
                     status: 'pending_payment'
                 },
                 data: {
                     status: 'active'
                 }
             })
+            console.log("payId nhận vào là:", payId)
 
             // Cập nhật trạng thái thanh toán thành completed
             await prisma.payments.updateMany({  
