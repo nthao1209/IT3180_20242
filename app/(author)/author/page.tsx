@@ -16,7 +16,7 @@ async function AuthorPage({
   const [books, total] = await prisma.$transaction([
     prisma.books.findMany({
       skip: offset, take: take,
-      // where: {author_id: session.user.user_id },
+      where: {author_id: parseInt(session.user.id, 10) },
       select: {
         book_id: true,
         name: true,
@@ -34,6 +34,19 @@ async function AuthorPage({
           select: {
             photo_id: true,
             url : true
+          }
+        },
+        book_requests: {
+          where:{
+            action: 'update'
+          },
+          orderBy: {
+            created_at: 'desc'
+          },
+          take: 1,
+          select: {
+            action: true,
+            status: true
           }
         }
        

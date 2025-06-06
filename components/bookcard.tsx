@@ -14,8 +14,9 @@ interface BookCardBook { // Đổi tên để tránh nhầm lẫn với kiểu B
   cover_image: string | null; // Thêm trường này
   book_id: number;
   name: string | null;
-  author: BookAuthorInfo | null; // THAY ĐỔI Ở ĐÂY: author giờ là object hoặc null
+  users: BookAuthorInfo | null; // THAY ĐỔI Ở ĐÂY: author giờ là object hoặc null
   book_photos: { url: string }[];
+  author_name: string | null;
   // Thêm các trường khác từ BookSearchResult nếu BookCard cần hiển thị chúng
   // Ví dụ: price: number; description: string | null;
 }
@@ -58,9 +59,9 @@ export default function BookCard({ book }: BookCardProps) {
             </h3>
             <p 
               className="text-xs text-gray-500 mt-1 truncate" 
-              title={book.author?.name || ""} // SỬA Ở ĐÂY: Truy cập book.author.name
+              title={book.author_name || ""} // SỬA Ở ĐÂY: Truy cập book.author.name
             >
-              {book.author?.name || "Unknown Author"} {/* SỬA Ở ĐÂY */}
+              {book.author_name || "Unknown Author"} {/* SỬA Ở ĐÂY */}
             </p>
           </div>
         </div>

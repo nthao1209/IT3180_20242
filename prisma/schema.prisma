@@ -36,6 +36,7 @@ model books {
   isbn                String                @db.VarChar(13)
   name                String                @db.VarChar(200)
   author_id           Int
+  author_name         String                 @db.VarChar(200)
   description         String?
   published_date      Int
   cover_image         String?               @db.VarChar(255)

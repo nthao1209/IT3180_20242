@@ -111,7 +111,7 @@ export default function RegisterPage({
         </select>
       </div>
       <div>
-        <Label htmlFor="password">Mật khẩu</Label>
+        <Label htmlFor="password">Mật khẩu ( Vui lòng nhập ít nhất 8 ký tự ) </Label>
         <Input name="password" id="password" type="password" required />
       </div>
       <div>

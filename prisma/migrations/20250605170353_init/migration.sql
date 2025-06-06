@@ -8,8 +8,8 @@ CREATE TABLE "users" (
     "email" VARCHAR(100) NOT NULL,
     "password" TEXT NOT NULL,
     "name" VARCHAR(100) NOT NULL,
-    "date_of_birth" DATE,
-    "gender" "Gender",
+    "date_of_birth" DATE NOT NULL,
+    "gender" "Gender" NOT NULL,
     "role" VARCHAR(30) NOT NULL,
     "created_at" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -22,6 +22,7 @@ CREATE TABLE "books" (
     "isbn" VARCHAR(13) NOT NULL,
     "name" VARCHAR(200) NOT NULL,
     "author_id" INTEGER NOT NULL,
+    "author_name" VARCHAR(200) NOT NULL,
     "description" TEXT,
     "published_date" INTEGER NOT NULL,
     "cover_image" VARCHAR(255),
@@ -78,7 +79,6 @@ CREATE TABLE "ratings" (
     "book_id" INTEGER NOT NULL,
     "user_id" INTEGER NOT NULL,
     "rating" INTEGER NOT NULL,
-    "review" TEXT,
     "created_at" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ratings_pkey" PRIMARY KEY ("rating_id")
@@ -112,12 +112,22 @@ CREATE TABLE "replies" (
 CREATE TABLE "payments" (
     "pay_id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
-    "book_id" INTEGER NOT NULL,
     "amount" DECIMAL(10,2) NOT NULL,
     "status" VARCHAR(20) NOT NULL,
+    "payment_method" VARCHAR(30) NOT NULL,
+    "payment_details" TEXT,
     "paid_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "payments_pkey" PRIMARY KEY ("pay_id")
+);
+
+-- CreateTable
+CREATE TABLE "payment_books" (
+    "payment_id" INTEGER NOT NULL,
+    "book_id" INTEGER NOT NULL,
+    "amount" DECIMAL(10,2) NOT NULL,
+
+    CONSTRAINT "payment_books_pkey" PRIMARY KEY ("payment_id","book_id")
 );
 
 -- CreateTable
@@ -126,6 +136,7 @@ CREATE TABLE "user_books" (
     "user_id" INTEGER NOT NULL,
     "book_id" INTEGER NOT NULL,
     "purchased_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "status" TEXT NOT NULL,
 
     CONSTRAINT "user_books_pkey" PRIMARY KEY ("id")
 );
@@ -154,26 +165,25 @@ CREATE TABLE "book_requests" (
 );
 
 -- CreateTable
-CREATE TABLE "activities" (
-    "activity_id" SERIAL NOT NULL,
-    "title" VARCHAR(200) NOT NULL,
-    "description" TEXT NOT NULL,
-    "activity_date" DATE NOT NULL,
-    "start_time" VARCHAR(8) NOT NULL,
-    "end_time" VARCHAR(8) NOT NULL,
-    "age_group" VARCHAR(50) NOT NULL,
-    "capacity" INTEGER NOT NULL,
+CREATE TABLE "reservations" (
+    "reservation_id" SERIAL NOT NULL,
+    "book_id" INTEGER NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "reservation_date" DATE NOT NULL,
+    "expiration_date" DATE NOT NULL,
 
-    CONSTRAINT "activities_pkey" PRIMARY KEY ("activity_id")
+    CONSTRAINT "reservations_pkey" PRIMARY KEY ("reservation_id")
 );
 
 -- CreateTable
-CREATE TABLE "activity_photos" (
-    "photo_id" SERIAL NOT NULL,
-    "activity_id" INTEGER NOT NULL,
-    "url" VARCHAR(1024) NOT NULL,
+CREATE TABLE "activities" (
+    "activity_id" SERIAL NOT NULL,
+    "title" VARCHAR(200) NOT NULL,
+    "description" TEXT,
+    "created_at" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "activity_photos_pkey" PRIMARY KEY ("photo_id")
+    CONSTRAINT "activities_pkey" PRIMARY KEY ("activity_id")
 );
 
 -- CreateIndex
@@ -216,22 +226,22 @@ CREATE INDEX "comment_id_reply" ON "replies"("comment_id");
 CREATE INDEX "user_id_reply" ON "replies"("user_id");
 
 -- CreateIndex
+CREATE INDEX "payment_books_book_id_idx" ON "payment_books"("book_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "user_books_user_id_book_id_key" ON "user_books"("user_id", "book_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "liked_books_user_id_book_id_key" ON "liked_books"("user_id", "book_id");
 
--- CreateIndex
-CREATE INDEX "activity_photos_activity_id_idx" ON "activity_photos"("activity_id");
-
 -- AddForeignKey
 ALTER TABLE "books" ADD CONSTRAINT "author_book" FOREIGN KEY ("author_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "reading_sessions" ADD CONSTRAINT "reading_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "reading_sessions" ADD CONSTRAINT "reading_sessions_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "reading_sessions" ADD CONSTRAINT "reading_sessions_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "reading_sessions" ADD CONSTRAINT "reading_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "book_photos" ADD CONSTRAINT "book_photos_ibfk_1" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -264,19 +274,22 @@ ALTER TABLE "replies" ADD CONSTRAINT "replies_ibfk_2" FOREIGN KEY ("user_id") RE
 ALTER TABLE "payments" ADD CONSTRAINT "payments_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "payments" ADD CONSTRAINT "payments_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "payment_books" ADD CONSTRAINT "payment_books_payment_id_fkey" FOREIGN KEY ("payment_id") REFERENCES "payments"("pay_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_books" ADD CONSTRAINT "user_books_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "payment_books" ADD CONSTRAINT "payment_books_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_books" ADD CONSTRAINT "user_books_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "liked_books" ADD CONSTRAINT "liked_books_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "user_books" ADD CONSTRAINT "user_books_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "liked_books" ADD CONSTRAINT "liked_books_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "liked_books" ADD CONSTRAINT "liked_books_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "book_requests" ADD CONSTRAINT "book_requests_author_id_fkey" FOREIGN KEY ("author_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -285,4 +298,7 @@ ALTER TABLE "book_requests" ADD CONSTRAINT "book_requests_author_id_fkey" FOREIG
 ALTER TABLE "book_requests" ADD CONSTRAINT "book_requests_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "activity_photos" ADD CONSTRAINT "activity_photos_activity_id_fkey" FOREIGN KEY ("activity_id") REFERENCES "activities"("activity_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "reservations" ADD CONSTRAINT "reservations_ibfk_1" FOREIGN KEY ("book_id") REFERENCES "books"("book_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "reservations" ADD CONSTRAINT "reservations_ibfk_2" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE NO ACTION ON UPDATE NO ACTION;

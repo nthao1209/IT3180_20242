@@ -5,7 +5,7 @@ import { Book, columns } from './columns'
 import { DataTable } from '@/components/data-table'
 import { usePathname } from 'next/navigation'
 import ConfirmationDialog from '@/components/confirmation-dialog'
- import { deleteBook } from '@/actions/actions'
+ import { requestDeleteBook } from '@/actions/actions'
 import { toast } from 'sonner'
 import AddBookDialog from '@/components/add-book-dialog'
 
@@ -38,7 +38,7 @@ function CatalogTable({ data, total }: props) {
     if (itemToAction) {
 
       startTransition(async () => {
-        await deleteBook(itemToAction.book_id, pathname)
+        await requestDeleteBook(itemToAction.book_id, pathname)
       })
 
       toast( `${itemToAction.name} deleted`)

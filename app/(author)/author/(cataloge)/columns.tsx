@@ -21,7 +21,8 @@ export type Book = {
     book_photos?: Photo[],
     published_date: number,
     author: string,
-    state: Boolean
+    state: Boolean,
+    book_requests: { action: string, status: string }[]
 }
 
 export const columns: ColumnDef<Book>[] = [
@@ -60,8 +61,17 @@ export const columns: ColumnDef<Book>[] = [
         enableSorting: false,
         header: ({ column }) => <DataTableColumnHeader column={column} title="State" />,
         cell: ({ row }) => (
-          <p className="capitalize">{row.getValue('state') ? 'Done' : 'Wait'}</p>
+          <p className="capitalize">{row.getValue('state') ? 'OK' : 'Wait'}</p>
         )
+      },
+      {
+        accessorKey: 'book_requests',
+        enableSorting: false,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Update" />,
+        cell: ({ row }) => {
+            const requests = row.getValue('book_requests') as { action: string, status: string }[];
+            return <p className="capitalize">{requests[0]?.status || '—'}</p>
+        }
       },
     
     createRowActions<Book>()

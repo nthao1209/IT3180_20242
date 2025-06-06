@@ -11,11 +11,11 @@ import BookCard from "@/components/bookcard";
 interface HomePageBook {
   book_id: number;
   cover_image: string | null; // Thêm trường cover_image
-  author: BookAuthorInfo | null;
+  users: BookAuthorInfo | null;
   name: string | null;
   author_id: number | null; 
   book_photos: { url: string }[];
-  
+  author_name: string | null;
 }
 
 interface RecentlyReviewedBook extends HomePageBook {
@@ -57,9 +57,16 @@ export default async function HomePage() {
         name: true,
         author_id: true,
         cover_image: true,
+        author_name: true,
         book_photos: {
           select: { url: true },
           take: 1,
+        },
+        users:{
+          select:{
+            user_id: true,
+            name: true
+          }
         }
       },
       orderBy: {

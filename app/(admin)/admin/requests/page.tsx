@@ -12,23 +12,17 @@ async function getBookRequests(): Promise<{ data: Request[], total: number }> {
       books: {
         select: {
           name: true,
-          users: {
-            select: {
-              name: true
-            }
-          }
+          author_name: true
         }
       }
     }
   })
 
   const requests: Request[] = dbResults.map((req) => {
-    // Nếu details là null hoặc không parse được, để rỗng {}
-    const parsedDetails = req.details ? JSON.parse(req.details) : {}
     return {
       id: req.request_id,
-      book_title: parsedDetails.name || "—", // Giả sử bạn lưu tên sách dưới key `name`
-      author_name: req.users?.name || "Không rõ",
+      book_title: req.books?.name || "—",
+      author_name: req.books?.author_name || "Không rõ",
       type: (req.action === "add" ? "create" : req.action) as
         | "create"
         | "update"

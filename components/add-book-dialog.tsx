@@ -36,7 +36,8 @@ const formSchema = z.object({
     category: z.array(z.number()).min(1, {
         message: 'A book must have a category'
     }),
-    photos: z.array(z.string()).default([])
+    photos: z.array(z.string()).default([]),
+    author_name: z.string().default('')
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -57,7 +58,8 @@ function AddBookDialog({ open, setOpen, book }: props) {
             category: [],
             photos: [],
             file_path: '',
-            published_date: new Date().getFullYear()
+            published_date: new Date().getFullYear(),
+            author_name: ''
         }
     })
 
@@ -75,9 +77,10 @@ function AddBookDialog({ open, setOpen, book }: props) {
             form.setValue('isbn', book.isbn)
             form.setValue('published_date', book.published_date)
             form.setValue('category', book.book_category_links?.map(c => c.category_id) as number[])
-            form.setValue('file_path', book.file_path)
+            form.setValue('file_path', book.file_path || '')
             form.setValue('photos', book.book_photos?.map(p => p.url) || [])
             form.setValue('price', book.price)
+            form.setValue('author_name', book.author_name)
         }
     }, [book, form])
 
@@ -104,8 +107,20 @@ function AddBookDialog({ open, setOpen, book }: props) {
                 message = 'book updated'
                 setOpen(false)
             } else {
-                await addBook({...values, path})
-                await requestAddBook({ ...values, path })
+               const book =  await addBook({...values, path})
+               console.log(book.book_id);
+                await requestAddBook({
+                    id: book.book_id,
+                    name: values.name,
+                    isbn: values.isbn,
+                    category: values.category,
+                    path: path,
+                    photos: values.photos,
+                    published_date: values.published_date,
+                    price: values.price,
+                    file_path: values.file_path,
+                    author_name: values.author_name
+                  });
             }
 
             toast.success(message)
@@ -202,6 +217,19 @@ function AddBookDialog({ open, setOpen, book }: props) {
                                         <FormLabel>Book name</FormLabel>
                                         <FormControl>
                                             <Input placeholder='book name' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name='author_name'
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Author name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder='author name' {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

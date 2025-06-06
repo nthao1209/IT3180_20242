@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-nocheck
 'use server'
@@ -32,7 +31,7 @@ type Book = {
     no_of_copies: number;
     is_active: boolean;
     publish_year: number;
-    author: string;
+    author_name: string;
     book_photos: { photo_id: number; url: string; }[];
     book_category_links: { category_id: number; }[];
 };
@@ -53,116 +52,165 @@ type Book = {
 //       throw new Error("Unauthorized");
 //     }
 //   }
-
-export async function requestAddBook(formData: FormData) {
-    const name = formData.get('name') as string;
-    const isbn = formData.get('isbn') as string;
-    const file_path = formData.get('file_path') as string;
-    const price = parseFloat(formData.get('price') as string);
-    const published_date = new Date(formData.get('published_date') as string).getFullYear();
-    const path = formData.get('path') as string;
-    const category = [1]; // Default category for now
-
+export async function requestAddBook({
+    id,
+    name,
+    isbn,
+    category,
+    path,
+    published_date,
+    price,
+    file_path,
+    author_name
+  }: {
+    id: number,
+    name: string
+    isbn: string
+    category: number[]
+    path: string,
+    photos: string[],
+    published_date: number,
+    price: number,
+    file_path: string,
+    author_name: string
+  }) {
+   
     try {
+        const session = await auth();
         await prisma.book_requests.create({
             data: {
-                author_id: 1, // TODO: Get from session
-                action: "add",
-                details: JSON.stringify({
-                    name,
-                    isbn,
-                    category,
-                    file_path,
-                    price,
-                    published_date,
-                }),
-                status: "pending",
-            },
-        });
-        revalidatePath(path);
-        return { message: "Add book request submitted" };
-    } catch (error) {
-        throw error;
-    }
-}
-
-export async function requestUpdateBook(formData: FormData) {
-    const id = parseInt(formData.get('id') as string);
-    const name = formData.get('name') as string;
-    const isbn = formData.get('isbn') as string;
-    const file_path = formData.get('file_path') as string;
-    const price = parseFloat(formData.get('price') as string);
-    const published_date = new Date(formData.get('published_date') as string).getFullYear();
-    const path = formData.get('path') as string;
-    const category = [1]; // Default category for now
-
-    try {
-        await prisma.book_requests.create({
-            data: {
-                book_id: id,
-                author_id: 1, // TODO: Get from session
-                action: "update",
-                details: JSON.stringify({
-                    name: name,
-                    isbn: isbn,
-                    category: category,
-                    file_path: file_path,
-                    price: price,
-                    published_date: published_date,
-                }),
-                status: "pending",
+            book_id: id,
+             author_id: parseInt(session?.user.id),
+            action: "add",
+            details: JSON.stringify({
+                name,
+                isbn,
+                category,
+                file_path,
+                price,
+                published_date,
+                author_name
+            }),
+            status: "pending",
             },
         });
         revalidatePath(path);
         return { message: "Update book request submitted" };
     } catch (error) {
-        throw error;
+        throw error
     }
-}
-
-export async function requestDeleteBook(formData: FormData) {
-    const book_id = parseInt(formData.get('id') as string);
-    const path = formData.get('path') as string;
-
-    const session = await auth();
-    if (!session) {
-        throw new Error("Not authenticated");
-    }
-
-    const existingRequest = await prisma.book_requests.findFirst({
-        where: {
-            book_id,
-            action: "delete",
+    
+  
+    
+  }
+ 
+export async function requestUpdateBook({
+    id,
+    name,
+    isbn,
+    category,
+    path,
+    published_date,
+    price,
+    file_path,
+    author_name
+  }: {
+    id: number,
+    name: string
+    isbn: string
+    category: number[]
+    path: string,
+    photos: string[],
+    published_date: number,
+    price: number,
+    file_path: string,
+    author_name: string
+  }) {
+    try {
+        const session = await auth();
+        await prisma.book_requests.deleteMany({
+            where: {
+                book_id: id,
+                action: 'update',
+            }
+        });
+        await prisma.book_requests.create({
+            data: {
+            book_id: id,
+             author_id: parseInt(session?.user.id),
+           
+            action: "update",
+            details: JSON.stringify({
+                name,
+                isbn,
+                category,
+                file_path,
+                price,
+                published_date,
+                author_name
+            }),
             status: "pending",
-        },
-    });
-
-    if (existingRequest) {
-        throw new Error("A delete request is already pending for this book");
+            },
+        });
+        await prisma.books.update({
+            where: {
+                book_id: id
+            },
+            data: {
+              state: false
+            }
+        });
+       
+        revalidatePath(path);
+        return { message: "Update book request submitted" };
+    } catch (error) {
+        throw error
     }
+    
+
+  }
+  
+  export async function requestDeleteBook(book_id: number, path: string) {
+    const session = await auth();
+  
+    const existingRequest = await prisma.book_requests.findFirst({
+      where: {
+        book_id,
+        action: "delete",
+        status: "pending",
+      },
+    });
+  
+    if (existingRequest) {
+      throw new Error("A delete request is already pending for this book");
+    }
+    const book = await prisma.books.findFirst({
+      where: {
+        book_id: book_id
+      }
+    })
 
     await prisma.book_requests.create({
-        data: {
-            book_id,
-            author_id: parseInt(session.user.id),
-            action: "delete",
-            details: "{}",
-            status: "pending",
-        },
+      data: {
+        book_id,
+        author_id:  parseInt(session?.user.id),
+        action: "delete",
+        details: "{}",
+        status: "pending",
+      },
     });
-
     await prisma.books.update({
         where: {
             book_id: book_id
         },
         data: {
-            state: false
+          state: false
         }
-    });
-
+    })
+  
     revalidatePath(path);
     return { message: "Delete book request submitted" };
-}
+  }
 ////////////////////////////////////////////////////////////////////////////////
 //              Book
 ////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +225,8 @@ export async function addBook({
     photos,
     price,
     published_date,
-    file_path
+    file_path,
+    author_name
 }: {
     name: string
     isbn: string
@@ -186,10 +235,11 @@ export async function addBook({
     photos: string[],
     price: number,
     published_date: number,
-    file_path: string
+    file_path: string,
+    author_name: string
 }) {
     // Validate required fields
-    if (!name || !isbn) {
+    if (!name || !isbn ) {
         throw new Error('Name, ISBN and author are required fields')
     }
 
@@ -203,44 +253,29 @@ export async function addBook({
 
     const existingBook = await prisma.books.findFirst({ where: { isbn } });
     const existingRequest = await prisma.book_requests.findFirst({
-        where: { details: { contains: `"isbn":"${isbn}"` }, status: "pending" },
+         where: { details: { contains: `"isbn":"${isbn}"` }, status: "pending" },
     });
     if (existingBook || existingRequest) {
         throw new Error("ISBN already exists");
     }
 
-
     try {
-        await prisma.$transaction(async (t: {
-                books: {
-                    create: (arg0: {
-                        data: {
-                            name: string; isbn: string;
-                            // author_id: (await auth())!.user.user_id,
-                            author_id: number; price: number; published_date: number; file_path: string;
-                        };
-                    }) => any;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                }; book_category_links: { createMany: (arg0: { data: { book_id: any; category_id: number; }[]; }) => any; }; book_photos: {
-                    createMany: (arg0: {
-                        data: {
-                            book_id: any; url:
-                                //import { formatAmountForStripe } from "@/lib/utils"
-                                string;
-                        }[];
-                    }) => any;
-                };
-            }) => {
+        const result = await prisma.$transaction(async t => {
+            const session = await auth();
             const book = await t.books.create({
                 data: {
                     name: name,
                     isbn: isbn,
-                    // author_id: (await auth())!.user.user_id,
-                    author_id: 1,
+                    author_id: parseInt(session?.user.id),
+                    author_name: author_name,
                     price: price,
                     published_date: published_date,
                     file_path: file_path
-                }
+                },
+                select: {
+                    book_id: true,
+                    name: true, 
+                  },
             })
 
             if (category && category.length > 0) {
@@ -260,8 +295,10 @@ export async function addBook({
                 await t.book_photos.createMany({ data })
             }
             revalidatePath(path)
+            return book;
         })
-    } catch (error) {
+        return result;
+    } catch(error) {
         console.error('Error adding book:', error)
         throw error
     }
@@ -275,7 +312,8 @@ export async function updateBook({
     path,
     published_date,
     price,
-    file_path
+    file_path,
+    author_name
 }: {
     id: number,
     name: string
@@ -285,7 +323,8 @@ export async function updateBook({
     photos: string[],
     published_date: number,
     price: number,
-    file_path: string
+    file_path: string,
+    author_name: string
 }) {
 
     try {
@@ -302,7 +341,8 @@ export async function updateBook({
                     isbn: isbn,
                     file_path: file_path,
                     price: price,
-                    published_date: published_date
+                    published_date: published_date,
+                    author_name: author_name
                 }
             })
 
@@ -1404,28 +1444,20 @@ export async function approveBookRequestAction(requestId: number, path: string) 
             const details = JSON.parse(request.details || '{}');
 
             if (request.action === 'add') {
-                const book = await tx.books.create({
+                await tx.books.update({
+                    where: {
+                        book_id: request.book_id
+                    },
                     data: {
-                        name: details.name,
-                        isbn: details.isbn,
-                        author_id: request.author_id,
-                        file_path: details.file_path,
-                        price: details.price,
-                        published_date: details.published_date,
                         state: true
                     }
                 });
+                await tx.book_requests.delete({
+                    where: {
+                        request_id: requestId
+                    }
+                });
 
-                // Handle categories separately
-                if (details.category && Array.isArray(details.category)) {
-                    const categoryLinks = details.category.map((catId: number) => ({
-                        book_id: book.book_id,
-                        category_id: catId
-                    }));
-                    await tx.book_category_links.createMany({
-                        data: categoryLinks
-                    });
-                }
             } else if (request.action === 'update' && request.book_id) {
                 await tx.books.update({
                     where: { book_id: request.book_id },
@@ -1434,9 +1466,11 @@ export async function approveBookRequestAction(requestId: number, path: string) 
                         isbn: details.isbn,
                         file_path: details.file_path,
                         price: details.price,
-                        published_date: details.published_date
+                        published_date: details.published_date,
+                        state: true
                     }
                 });
+              
 
                 // Handle categories separately
                 if (details.category && Array.isArray(details.category)) {
@@ -1454,12 +1488,28 @@ export async function approveBookRequestAction(requestId: number, path: string) 
                         data: categoryLinks
                     });
                 }
-            }
 
-            await tx.book_requests.update({
-                where: { request_id: requestId },
-                data: { status: 'approved' }
-            });
+                // Xóa các request update khác của cùng book_id
+                
+
+                await tx.book_requests.update({
+                    where: { request_id: requestId },
+                    data: { status: 'approved' }
+                });
+            } else if (request.action === 'delete') {
+                await tx.books.delete({
+                    where: {
+                        book_id: request.book_id
+                    }
+                });
+                await tx.book_requests.delete({
+                    where: {
+                        request_id: requestId
+                    }
+                });
+            }
+           
+           
         });
 
         revalidatePath(path);
@@ -1725,7 +1775,7 @@ export async function createTestAccount() {
 //     file_path: string
 // }) {
 //     // Validate required fields
-//     if (!name || !isbn) {
+//     if (!name || !isbn ) {
 //         throw new Error('Name, ISBN and author are required fields')
 //     }
 
