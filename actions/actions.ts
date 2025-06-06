@@ -2785,10 +2785,10 @@ export async function createTestAccount() {
 // ////////////////////////////////////////////////////////////////////////////////
 
 // // Kiểu dữ liệu khi tạo yêu cầu thay đổi sách (admin hoặc user gửi request)
-// type BookRequestInput = Omit<
-//     Prisma.book_requestsCreateInput,
-//     "id" | "status" | "requested_at" | "processed_at"
-// >
+type BookRequestInput = Omit<
+    Prisma.book_requestsCreateInput,
+    "request_id" | "status" | "created_at"
+>;
 
 // /**
 //  * Dùng khi admin muốn tạo request thay mặt ai đó (hiếm khi, chủ yếu là user sẽ gửi)
