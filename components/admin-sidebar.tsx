@@ -29,12 +29,7 @@ const menuItems = [
     url: '/admin/requests',
     icon: Mail,
   },
-  // Bạn có thể thêm lại 'Reports' nếu cần
-  // {
-  //   title: 'Reports',
-  //   url: '/admin/reports',
-  //   icon: BarChart,
-  // },
+  
 ];
 
 // Định nghĩa kiểu cho props của AdminSidebar
