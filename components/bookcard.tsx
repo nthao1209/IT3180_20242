@@ -40,13 +40,13 @@ export default function BookCard({ book }: BookCardProps) {
         href={`/book/${book.book_id}`}
         className="block group h-full flex flex-col">
         <div className="relative w-full aspect-[2/3] bg-gray-100">
-          <Image
+          {/* <Image
             src={imageToDisplay}
             alt={book.name || 'Book cover'}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          /> */}
         </div>
         <div className="p-3 flex-grow flex flex-col justify-between">
           <div>

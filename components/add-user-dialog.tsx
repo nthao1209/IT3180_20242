@@ -124,8 +124,9 @@ function AddUserDialog({ open, setOpen, user }: Props) {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value='member'>Member</SelectItem>
-                                                <SelectItem value='staff'>Staff</SelectItem>
+                                                <SelectItem value='member'>member</SelectItem>
+                                                <SelectItem value='author'>author</SelectItem>
+                                                <SelectItem value='admin'>admin</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />

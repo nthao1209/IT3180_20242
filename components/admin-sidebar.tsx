@@ -5,6 +5,7 @@ import React from 'react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'; // Đảm bảo đường dẫn đúng
 import { Library, MapIcon, User2, Mail, BarChart } from 'lucide-react'; // Bỏ CreditCard, LogOut nếu không dùng trực tiếp ở đây
 import Link from 'next/link';
+import { CreditCard } from 'lucide-react';
 // KHÔNG import UserButton trực tiếp ở đây nữa
 // import UserButton from './user-button';
 
@@ -29,6 +30,12 @@ const menuItems = [
     url: '/admin/requests',
     icon: Mail,
   },
+  {
+    title: 'Purchases',
+    url: '/admin/purchases',
+    icon: CreditCard,
+  }
+  
   // Bạn có thể thêm lại 'Reports' nếu cần
   // {
   //   title: 'Reports',

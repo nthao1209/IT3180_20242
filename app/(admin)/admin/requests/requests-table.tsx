@@ -6,7 +6,7 @@ import { DataTable } from '@/components/data-table'
 import { usePathname } from 'next/navigation'
 import ConfirmationDialog from '@/components/confirmation-dialog'
 import { useToast } from '@/hooks/use-toast'
-import { approveBookRequestAction, rejectBookRequestAction } from '@/actions/actions'
+import { approveBookRequest, rejectBookRequest } from '@/actions/actions'
 import RequestDetailDialog from './requestDialogy'
 
 type Props = {
@@ -46,10 +46,10 @@ function RequestsTable({ data }: { data: Props }) {
 
     startTransition(async () => {
       if (actionType === 'approve') {
-        await approveBookRequestAction(selectedRequest.id, pathname)
+        await approveBookRequest(selectedRequest.id, pathname)
         toast({ description: `The request for "${selectedRequest.book_title}" has been approved.` })
       } else {
-        await rejectBookRequestAction(selectedRequest.id, pathname)
+        await rejectBookRequest(selectedRequest.id, pathname)
         toast({ description: `The request for "${selectedRequest.book_title}" has been rejected.` })
       }
     })

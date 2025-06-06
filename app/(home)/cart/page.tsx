@@ -72,7 +72,7 @@ export default function CartPage() {
             <div className="space-y-4">
               {cart.map((item) => (
                 <div key={item.book_id} className="flex items-center gap-4 p-4 border rounded-lg">
-                  {item.cover_image && (
+                  {/* {item.cover_image && (
                     <Image
                       src={item.cover_image}
                       alt={item.name}
@@ -80,7 +80,7 @@ export default function CartPage() {
                       height={150}
                       className="object-cover rounded"
                     />
-                  )}
+                  )} */}
                   <div className="flex-grow">
                     <h3 className="font-semibold">{item.name}</h3>
                     <p className="text-gray-600">{item.author?.name}</p>

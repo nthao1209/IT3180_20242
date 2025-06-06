@@ -140,7 +140,7 @@ export default function PendingPaymentPage() {
             </li>
             <li className="flex items-start">
               <span className="text-blue-600 mr-2">→</span>
-              <span>You'll receive an email notification with confirmation</span>
+              <span>You will receive an email notification with confirmation</span>
             </li>
           </ul>
         </div>
